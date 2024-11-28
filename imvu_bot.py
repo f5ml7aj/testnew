@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
@@ -55,6 +54,9 @@ def login(account):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
+        # التقاط لقطة شاشة لصفحة تسجيل الدخول
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
+
         # إدخال الإيميل
         email_field = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "avatarname"))
@@ -78,6 +80,8 @@ def login(account):
 
         # الانتظار للتأكد من تسجيل الدخول بنجاح
         time.sleep(5)
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
+
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
@@ -89,3 +93,4 @@ for account in accounts:
 
 # إغلاق المتصفح
 driver.quit()
+
