@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from PIL import Image, ImageDraw
 import os
 import time
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.firefox import GeckoDriverManager
 
 # إعداد المتصفح
@@ -41,6 +42,8 @@ def save_click_location_screenshot(element, step_name):
     image.save(screenshot_path)
     screenshot_counter += 1
     print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
+    
+    return x, y  # إرجاع مكان الضغط
 
 # بيانات تسجيل الدخول
 accounts = [
@@ -94,6 +97,12 @@ def login(account):
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
+
+        # الضغط مرتين في المكان المحدد بعد تحميل الصفحة
+        x, y = save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_page_loaded")
+        actions = ActionChains(driver)
+        actions.move_by_offset(x, y).click().move_by_offset(x, y).click().perform()
+        print(f"تم الضغط مرتين في المكان المحدد: ({x}, {y})")
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
