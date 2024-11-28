@@ -93,4 +93,3 @@ for account in accounts:
 
 # إغلاق المتصفح
 driver.quit()
-
