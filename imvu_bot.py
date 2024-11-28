@@ -54,6 +54,17 @@ def login(account):
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
+        # التحقق من وجود صفحة الكوكيز والضغط على زر "قبول" إذا كانت موجودة
+        try:
+            cookie_accept_button = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Accept')]"))
+            )
+            cookie_accept_button.click()
+            print("تم تخطي صفحة الكوكيز بنجاح")
+            save_click_location_screenshot(cookie_accept_button, "cookie_accepted")
+        except:
+            print("لم يتم العثور على صفحة الكوكيز أو تم تخطيها بالفعل")
+
         # التقاط لقطة شاشة لصفحة تسجيل الدخول
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
 
