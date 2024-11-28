@@ -51,35 +51,37 @@ def login(account):
     try:
         # افتح صفحة تسجيل الدخول
         driver.get("https://api.imvu.com/")  # عدّل الرابط إذا لزم الأمر
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
         # التقاط لقطة شاشة لصفحة تسجيل الدخول
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
 
         # إدخال الإيميل
-        email_field = WebDriverWait(driver, 10).until(
+        email_field = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.NAME, "avatarname"))
         )
         email_field.send_keys(account["email"])
         save_click_location_screenshot(email_field, "email_entered")
 
         # إدخال كلمة المرور
-        password_field = WebDriverWait(driver, 10).until(
+        password_field = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.NAME, "password"))
         )
         password_field.send_keys(account["password"])
         save_click_location_screenshot(password_field, "password_entered")
 
         # الضغط على زر "تسجيل الدخول"
-        login_button = WebDriverWait(driver, 10).until(
+        login_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary"))
         )
         login_button.click()
         save_click_location_screenshot(login_button, "login_clicked")
 
         # الانتظار للتأكد من تسجيل الدخول بنجاح
-        time.sleep(5)
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
