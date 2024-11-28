@@ -1,2 +1,1 @@
-email1@example.com:password123
-email2@example.com:password456
+conq1@gmail.com:Moammedmax2
