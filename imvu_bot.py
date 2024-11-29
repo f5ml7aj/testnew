@@ -71,7 +71,7 @@ def skip_cookies_if_present():
 def login(account):
     try:
         # افتح صفحة تسجيل الدخول
-        driver.get("https://secure.imvu.com/welcome/login/")  # عدّل الرابط إذا لزم الأمر
+        driver.get("https://pt.secure.imvu.com/welcome/login/")  # عدّل الرابط إذا لزم الأمر
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
