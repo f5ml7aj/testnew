@@ -9,12 +9,14 @@ import os
 import time
 from webdriver_manager.chrome import ChromeDriverManager
 
-# إعداد متصفح Chrome
+# إعداد متصفح Chrome مع خيارات لتجاوز الكوكيز
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة
 chrome_options.add_argument("--disable-extensions")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+chrome_options.add_argument("--disable-cookies")  # تعطيل الكوكيز مباشرة
 
 # إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
@@ -47,16 +49,26 @@ def save_click_location_screenshot(element, step_name):
 
 def skip_cookies_if_present():
     try:
-        # الانتظار حتى ظهور نافذة الكوكيز
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'ACEITAR TODOS OS COOKIES')]"))
-        )
-        cookie_button = driver.find_element(By.XPATH, "//button[contains(text(), 'ACEITAR TODOS OS COOKIES')]")
-        save_click_location_screenshot(cookie_button, "cookie_button_found")
-        cookie_button.click()
-        print("تم الضغط على زر قبول الكوكيز.")
-    except Exception as e:
+        # البحث عن زر قبول الكوكيز باستخدام نصوص محتملة
+        possible_texts = [
+            "ACEITAR TODOS OS COOKIES",  # البرتغالية
+            "ACCEPT ALL COOKIES",       # الإنجليزية
+            "ACCEPTER TOUS LES COOKIES", # الفرنسية
+        ]
+        for text in possible_texts:
+            try:
+                cookie_button = WebDriverWait(driver, 3).until(
+                    EC.presence_of_element_located((By.XPATH, f"//button[contains(text(), '{text}')]"))
+                )
+                save_click_location_screenshot(cookie_button, "cookie_button_found")
+                cookie_button.click()
+                print("تم الضغط على زر قبول الكوكيز.")
+                return
+            except:
+                continue
         print("لم يتم العثور على نافذة الكوكيز أو تم تخطيها بالفعل.")
+    except Exception as e:
+        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
 
 def login(account):
     try:
