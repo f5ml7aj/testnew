@@ -63,11 +63,15 @@ def skip_cookies_if_present():
             EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'Accept All Cookies')]"))
         )
         cookie_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Accept All Cookies')]")
-        save_click_location_screenshot(cookie_button, "cookie_accept_button")
+        save_click_location_screenshot(cookie_button, "cookie_accept_button")  # حفظ قبل النقر
         cookie_button.click()  # اضغط على زر قبول الكوكيز
+        time.sleep(2)  # انتظر قليلاً لتأكيد الإجراء
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookies")  # حفظ بعد النقر
         print("تم تخطي نافذة الكوكيز.")
     except Exception as e:
-        print("لم يتم العثور على نافذة الكوكيز أو تم تخطيها بالفعل.")
+        # التقاط لقطة شاشة عند الخطأ
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "cookie_error")
+        print(f"لم يتم العثور على نافذة الكوكيز أو تم تخطيها بالفعل. الخطأ: {e}")
 
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
@@ -101,10 +105,11 @@ def login(account):
         login_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary"))
         )
+        save_click_location_screenshot(login_button, "before_login_click")  # قبل الضغط
         login_button.click()
-        save_click_location_screenshot(login_button, "login_clicked")
+        time.sleep(3)  # انتظار تحميل الصفحة
 
-        # الانتظار للتأكد من تسجيل الدخول بنجاح
+        # انتظار التأكيد على تسجيل الدخول
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
@@ -113,6 +118,7 @@ def login(account):
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "login_error")
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
 
 # تسجيل الدخول لكل حساب
