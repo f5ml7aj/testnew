@@ -9,16 +9,15 @@ import os
 import time
 from webdriver_manager.chrome import ChromeDriverManager
 
-# إعداد متصفح Chrome مع تعطيل الكوكيز
+# إعداد متصفح Chrome
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # لتشغيل المتصفح في وضع خفي
-chrome_options.add_argument("--disable-extensions")  # تعطيل الإضافات
-chrome_options.add_argument("--disable-gpu")  # تعطيل تسريع الأجهزة
-chrome_options.add_argument("--no-sandbox")  # لتشغيل المتصفح بدون حماية sandbox
-chrome_options.add_argument("--disable-logging")  # تعطيل السجلات
-chrome_options.add_argument("--disable-cookies")  # تعطيل الكوكيز
+chrome_options.add_argument("--headless")  # تشغيل المتصفح في وضع خفي
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-logging")
 
-# إعداد خدمة متصفح Chrome
+# إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
 
 # تهيئة متصفح Chrome
@@ -28,7 +27,7 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 if not os.path.exists("screenshots"):
     os.makedirs("screenshots")
 
-screenshot_counter = 1  # عداد الصور
+screenshot_counter = 1  # عداد لقطات الشاشة
 
 def save_click_location_screenshot(element, step_name):
     """حفظ لقطة شاشة مع تحديد مكان الضغط."""
@@ -57,25 +56,28 @@ accounts = [
 ]
 
 def skip_cookies_if_present():
+    """التعامل مع نافذة قبول الكوكيز إذا ظهرت."""
     try:
-        # التحقق مما إذا كانت صفحة الكوكيز موجودة
+        # انتظار ظهور زر الكوكيز
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "cookie-accept-button"))
+            EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'Accept All Cookies')]"))
         )
-        cookie_button = driver.find_element(By.ID, "cookie-accept-button")
-        cookie_button.click()  # اضغط لتخطي الكوكيز
-        print("تم تخطي صفحة الكوكيز")
+        cookie_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Accept All Cookies')]")
+        save_click_location_screenshot(cookie_button, "cookie_accept_button")
+        cookie_button.click()  # اضغط على زر قبول الكوكيز
+        print("تم تخطي نافذة الكوكيز.")
     except Exception as e:
-        print("لم يتم العثور على صفحة الكوكيز أو تم تخطيها بالفعل")
+        print("لم يتم العثور على نافذة الكوكيز أو تم تخطيها بالفعل.")
 
 def login(account):
+    """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         # افتح صفحة تسجيل الدخول
-        driver.get("https://pt.secure.imvu.com/welcome/login/")  # عدّل الرابط إذا لزم الأمر
+        driver.get("https://pt.secure.imvu.com/welcome/login/")
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
-        # تخطي صفحة الكوكيز إذا ظهرت
+        # تخطي نافذة الكوكيز إذا ظهرت
         skip_cookies_if_present()
 
         # التقاط لقطة شاشة لصفحة تسجيل الدخول
