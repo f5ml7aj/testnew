@@ -49,24 +49,13 @@ def save_click_location_screenshot(element, step_name):
 
 def skip_cookies_if_present():
     try:
-        # البحث عن زر قبول الكوكيز باستخدام نصوص محتملة
-        possible_texts = [
-            "ACEITAR TODOS OS COOKIES",  # البرتغالية
-            "ACCEPT ALL COOKIES",       # الإنجليزية
-            "ACCEPTER TOUS LES COOKIES", # الفرنسية
-        ]
-        for text in possible_texts:
-            try:
-                cookie_button = WebDriverWait(driver, 3).until(
-                    EC.presence_of_element_located((By.XPATH, f"//button[contains(text(), '{text}')]"))
-                )
-                save_click_location_screenshot(cookie_button, "cookie_button_found")
-                cookie_button.click()
-                print("تم الضغط على زر قبول الكوكيز.")
-                return
-            except:
-                continue
-        print("لم يتم العثور على نافذة الكوكيز أو تم تخطيها بالفعل.")
+        # البحث عن زر قبول الكوكيز باستخدام الفئة المحددة
+        cookie_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
+        )
+        save_click_location_screenshot(cookie_button, "cookie_button_found")
+        cookie_button.click()
+        print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
 
