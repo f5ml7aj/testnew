@@ -65,17 +65,37 @@ def load_accounts_from_file(file_path):
 
 def skip_cookies_if_present():
     try:
-        # البحث عن زر رفض الكوكيز باستخدام الـ Class
+        # البحث عن زر قبول الكوكيز باستخدام الـ Class
+        cookie_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
+        )
+        save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
+        cookie_button.click()  # الضغط على الزر
+        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
+        print("تم الضغط على زر قبول الكوكيز.")
+    except Exception as e:
+        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
+        
+def skip_privacy_preferences():
+    try:
+        # انتظار ظهور زر "Reject All" (باستخدام class)
         reject_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "ot-pc-refuse-all-handler"))
         )
-        save_click_location_screenshot(reject_button, "reject_button_found")  # لقطة قبل الضغط
-        reject_button.click()  # الضغط على الزر
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        print("تم الضغط على زر 'Reject All'.")
+        reject_button.click()  # الضغط على زر "Reject All"
+        print("تم رفض كل السياسات.")
+        
+        # أو إذا كنت تريد الضغط على زر "Open Preferences" أولاً، يمكنك استخدام الكود التالي:
+        open_preferences_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ot-floating-button__open"))
+        )
+        open_preferences_button.click()  # الضغط على زر "Open Preferences"
+        print("تم فتح تفضيلات الخصوصية.")
+        
     except Exception as e:
-        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
-
+        print(f"حدث خطأ أثناء التعامل مع النافذة: {e}")
+        
 def click_sign_in_button():
     try:
         # البحث عن زر "Entrar" والضغط عليه
@@ -85,6 +105,7 @@ def click_sign_in_button():
         save_click_location_screenshot(sign_in_button, "sign_in_button_found")  # لقطة قبل الضغط
         sign_in_button.click()  # الضغط على زر "Entrar"
         time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_sign_in_button_click")  # لقطة بعد الضغط
         print("تم الضغط على زر 'Entrar'.")
     except Exception as e:
         print(f"خطأ أثناء الضغط على زر 'Entrar': {e}")
@@ -136,7 +157,7 @@ def login(account):
 
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
-
+    skip_privacy_preferences()
 
 def go_to_next_page():
     """الانتقال إلى صفحة معينة بعد تسجيل الدخول."""
@@ -146,12 +167,11 @@ def go_to_next_page():
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
         # الانتظار لمدة 5 ثواني قبل التقاط لقطة الشاشة
-        time.sleep(5)
+        time.sleep(10)
 
         # التقاط لقطة شاشة للصفحة بعد الانتقال
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_waiting_on_page")
-        print("تم الانتظار لمدة 5 ثواني وتم التقاط لقطة الشاشة.")
-
+        print("تم الانتظار لمدة 10 ثواني وتم التقاط لقطة الشاشة.")
     except Exception as e:
         print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
 
