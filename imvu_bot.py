@@ -79,19 +79,15 @@ def skip_cookies_if_present():
         
 def skip_privacy_preferences():
     try:
-        # انتظار ظهور زر "Reject All" (باستخدام class)
-        reject_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ot-pc-refuse-all-handler"))
+        # البحث عن زر "I Accept" باستخدام الـ ID
+        accept_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))
         )
-        reject_button.click()  # الضغط على زر "Reject All"
-        print("تم رفض كل السياسات.")
-        
-        # أو إذا كنت تريد الضغط على زر "Open Preferences" أولاً، يمكنك استخدام الكود التالي:
-        open_preferences_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ot-floating-button__open"))
-        )
-        open_preferences_button.click()  # الضغط على زر "Open Preferences"
-        print("تم فتح تفضيلات الخصوصية.")
+        save_click_location_screenshot(accept_button, "accept_button_found")  # لقطة قبل الضغط
+        accept_button.click()  # الضغط على زر "I Accept"
+        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_accept_button_click")  # لقطة بعد الضغط
+        print("تم الضغط على زر 'I Accept'.")
         
     except Exception as e:
         print(f"حدث خطأ أثناء التعامل مع النافذة: {e}")
