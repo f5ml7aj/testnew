@@ -84,9 +84,11 @@ def login(account):
     try:
         # افتح صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com/welcome/login/")
-        WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        time.sleep(7)
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        time.sleep(3)
 
+        # تخطي نافذة الكوكيز إذا ظهرت
+        skip_cookies_if_present()
 
         # التقاط لقطة شاشة لصفحة تسجيل الدخول
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
