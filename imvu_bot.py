@@ -4,23 +4,28 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 from PIL import Image, ImageDraw
 import os
 import time
-from webdriver_manager.chrome import ChromeDriverManager
+import random
 
 # إعداد متصفح Chrome
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # تشغيل المتصفح في وضع خفي
 chrome_options.add_argument("--disable-extensions")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-logging")
+chrome_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # تعطيل كاشف الأتمتة
+chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")  # محاكاة متصفح حقيقي
+chrome_options.add_argument("--remote-debugging-port=9222")  # تعطيل اتصال DevTools
+chrome_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
 # إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
 
-# تهيئة متصفح Chrome
+# تهيئة المتصفح
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # إعداد مجلد لحفظ لقطات الشاشة
@@ -28,6 +33,10 @@ if not os.path.exists("screenshots"):
     os.makedirs("screenshots")
 
 screenshot_counter = 1  # عداد لقطات الشاشة
+
+def human_like_delay(min_delay=2, max_delay=5):
+    """إضافة تأخير عشوائي لمحاكاة التصفح البشري."""
+    time.sleep(random.uniform(min_delay, max_delay))
 
 def save_click_location_screenshot(element, step_name):
     """حفظ لقطة شاشة مع تحديد مكان الضغط."""
@@ -65,31 +74,29 @@ def load_accounts_from_file(file_path):
 
 def skip_cookies_if_present():
     try:
-        # البحث عن زر قبول الكوكيز باستخدام الـ Class
         cookie_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.accept-cookies"))
         )
-        save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
-        cookie_button.click()  # الضغط على الزر
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
+        save_click_location_screenshot(cookie_button, "cookie_button_found")
+        human_like_delay()
+        cookie_button.click()
+        human_like_delay()
         print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
-        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
+        print("لم يتم العثور على زر الكوكيز، أو تم التعامل معه مسبقًا.")
 
 def click_sign_in_button():
     try:
-        # البحث عن زر "Entrar" والضغط عليه
         sign_in_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "ul.secondary-nav button.sign-in"))
         )
-        save_click_location_screenshot(sign_in_button, "sign_in_button_found")  # لقطة قبل الضغط
-        sign_in_button.click()  # الضغط على زر "Entrar"
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_sign_in_button_click")  # لقطة بعد الضغط
+        save_click_location_screenshot(sign_in_button, "sign_in_button_found")
+        human_like_delay()
+        sign_in_button.click()
+        human_like_delay()
         print("تم الضغط على زر 'Entrar'.")
     except Exception as e:
-        print(f"خطأ أثناء الضغط على زر 'Entrar': {e}")
+        print("لم يتم العثور على زر 'Entrar'.")
 
 def wait_for_page_to_load():
     """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
@@ -99,23 +106,19 @@ def wait_for_page_to_load():
         )
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
-        print(f"حدث خطأ أثناء انتظار تحميل الصفحة: {e}")
+        print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
-        # افتح صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com")
-        wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بالكامل
+        wait_for_page_to_load()
 
-        # تخطي نافذة الكوكيز إذا ظهرت
+        # تخطي نافذة الكوكيز
         skip_cookies_if_present()
 
-        # الضغط على زر "Entrar"
+        # الضغط على زر تسجيل الدخول
         click_sign_in_button()
-
-        # التقاط لقطة شاشة لصفحة تسجيل الدخول
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
 
         # إدخال الإيميل
         email_field = WebDriverWait(driver, 20).until(
@@ -123,6 +126,7 @@ def login(account):
         )
         email_field.send_keys(account["email"])
         save_click_location_screenshot(email_field, "email_entered")
+        human_like_delay()
 
         # إدخال كلمة المرور
         password_field = WebDriverWait(driver, 20).until(
@@ -130,42 +134,35 @@ def login(account):
         )
         password_field.send_keys(account["password"])
         save_click_location_screenshot(password_field, "password_entered")
+        human_like_delay()
 
-        # الضغط على زر "تسجيل الدخول"
+        # الضغط على زر تسجيل الدخول
         login_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary"))
         )
-        login_button.click()
         save_click_location_screenshot(login_button, "login_clicked")
+        human_like_delay()
+        login_button.click()
 
-        # الانتظار للتأكد من تسجيل الدخول بنجاح
-        wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بعد تسجيل الدخول
-
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
+        wait_for_page_to_load()
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
-    except Exception as e:
-        print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
-
-# باقي الكود كما هو...
-
-def go_to_next_page():
-    """الانتقال إلى صفحة معينة بعد تسجيل الدخول."""
-    try:
-        # الانتقال إلى الصفحة
+        # بعد تسجيل الدخول، الانتقال إلى الصفحة المطلوبة
         driver.get("https://www.imvu.com/next/av/L7AJ/")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        wait_for_page_to_load()
 
-        # التقاط لقطة شاشة للصفحة بعد الانتقال
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_navigating_to_next_page")
-        print("تم الانتقال إلى صفحة IMVU بنجاح وتم التقاط لقطة شاشة.")
-        
-        # الانتظار قليلاً
-        time.sleep(5)
-        
+        # البحث عن الزر Follow والضغط عليه
+        follow_button = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB button"))
+        )
+        save_click_location_screenshot(follow_button, "follow_button_found")
+        human_like_delay()
+        follow_button.click()
+        print("تم الضغط على زر Follow.")
+
     except Exception as e:
-        print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
+        print(f"خطأ أثناء تسجيل الدخول أو التفاعل مع الزر: {e}")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -173,7 +170,6 @@ accounts = load_accounts_from_file("accounts.txt")
 # تسجيل الدخول لكل حساب
 for account in accounts:
     login(account)
-    go_to_next_page()
 
 # إغلاق المتصفح
 driver.quit()
