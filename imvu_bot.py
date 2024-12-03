@@ -63,9 +63,13 @@ def skip_cookies_if_present():
         )
         save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
         cookie_button.click()  # الضغط على الزر
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
-        print("تم الضغط على زر قبول الكوكيز.")
+        time.sleep(3)  # الانتظار 3 ثوانٍ بعد الضغط
+
+        # فتح صفحة تسجيل الدخول
+        driver.get("https://pt.secure.imvu.com/welcome/login/")
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "login_page_loaded")
+        print("تم الضغط على زر قبول الكوكيز، وتم فتح صفحة تسجيل الدخول.")
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
 
