@@ -53,8 +53,9 @@ def skip_cookies_if_present():
         cookie_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
         )
-        save_click_location_screenshot(cookie_button, "cookie_button_found")
-        cookie_button.click()
+        cookie_button.click()  # الضغط على الزر أولاً
+        time.sleep(1)  # انتظار قصير لضمان تسجيل النتيجة بعد الضغط
+        save_click_location_screenshot(cookie_button, "cookie_button_clicked")  # التقاط لقطة الشاشة بعد الضغط
         print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
