@@ -152,7 +152,7 @@ def login(account):
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
-
+        skip_privacy_preferences()
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
