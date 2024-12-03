@@ -149,10 +149,8 @@ def login(account):
         login_button.click()
         save_click_location_screenshot(login_button, "login_clicked")
 
-        # استخدام WebDriverWait بدلاً من time.sleep(4) للانتظار حتى تحميل الصفحة بعد تسجيل الدخول
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body"))
-        )
+        # الانتظار لمدة 4 ثوانٍ بعد الضغط على زر "تسجيل الدخول"
+        time.sleep(4)
 
         # تخطي نافذة تفضيلات الخصوصية بعد 4 ثوانٍ
         skip_privacy_preferences()
@@ -173,14 +171,10 @@ def go_to_next_page():
     try:
         # الانتقال إلى الصفحة
         driver.get("https://www.imvu.com/next/av/L7AJ/")
-        
-        # الانتظار حتى تحميل الصفحة
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
-        # بدلاً من الانتظار الثابت، استخدم WebDriverWait
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
+        # الانتظار لمدة 5 ثواني قبل التقاط لقطة الشاشة
+        time.sleep(10)
 
         # التقاط لقطة شاشة للصفحة بعد الانتقال
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_waiting_on_page")
