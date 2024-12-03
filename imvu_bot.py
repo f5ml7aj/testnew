@@ -150,7 +150,7 @@ def login(account):
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
         # بعد تسجيل الدخول، الانتقال إلى الصفحة المطلوبة
-        driver.get("https://www.imvu.com/next/av/L7AJ/")
+        driver.get("https://www.imvu.com/next/av/L7AJ/")  # الانتقال إلى الرابط المحدد
         wait_for_page_to_load()
 
         # البحث عن الزر Follow والضغط عليه
