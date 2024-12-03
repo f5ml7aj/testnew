@@ -150,7 +150,7 @@ def login(account):
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
         
-        driver.get("https://www.imvu.com/next/av/L7AJ/")
+        driver.get("https://www.imvu.com/next/home/")
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
@@ -162,6 +162,7 @@ def take_screenshot_after_delay():
     screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+    
 
 def take_screenshot_after_delay_3_minutes():
     """أخذ لقطة شاشة بعد 3 دقائق من فتح الصفحة الجديدة."""
