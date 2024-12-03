@@ -11,11 +11,15 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # إعداد متصفح Chrome
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # تشغيل المتصفح في وضع خفي
+# إزالة السطر التالي لتشغيل المتصفح مع واجهة المستخدم
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-extensions")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-logging")
+chrome_options.add_argument("--disable-dev-shm-usage")  # استخدام التخزين المؤقت في حالة قلة الذاكرة
+chrome_options.add_argument("--remote-debugging-port=9222")  # لتصحيح الأخطاء
+
 
 # إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
