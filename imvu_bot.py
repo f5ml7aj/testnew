@@ -63,26 +63,30 @@ def skip_cookies_if_present():
         )
         save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
         cookie_button.click()  # الضغط على الزر
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
-        print("تم الضغط على زر قبول الكوكيز.")
+        time.sleep(3)  # الانتظار 3 ثوانٍ بعد الضغط
+
+        # الانتقال إلى صفحة تسجيل الدخول
+        driver.get("https://pt.secure.imvu.com/welcome/login/")
+
+        # الانتظار حتى يتم تحميل عنصر محدد يشير إلى اكتمال الصفحة
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.NAME, "avatarname"))  # انتظار حقل الإدخال "avatarname"
+        )
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "login_page_loaded")
+        print("تم الضغط على زر قبول الكوكيز، وتم فتح صفحة تسجيل الدخول.")
     except Exception as e:
-        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
+        print(f"خطأ أثناء التعامل مع نافذة الكوكيز أو فتح صفحة تسجيل الدخول: {e}")
+
+
 
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         # افتح صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com/welcome/login/")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "before_cookie_interaction")  # لقطة قبل التفاعل مع الكوكيز
+        WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        time.sleep(7)
 
-        # تخطي نافذة الكوكيز إذا ظهرت
-        skip_cookies_if_present()
-
-        driver.get("https://pt.secure.imvu.com/welcome/login/")  # العودة إلى صفحة تسجيل الدخول بعد الضغط على الكوكيز
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_return_to_login_page")  # لقطة بعد العودة للصفحة
 
         # التقاط لقطة شاشة لصفحة تسجيل الدخول
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
