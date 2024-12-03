@@ -74,7 +74,7 @@ def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         # افتح صفحة تسجيل الدخول
-        driver.get("https://pt.secure.imvu.com/welcome/login/")
+        driver.get("https://pt.secure.imvu.com")
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
