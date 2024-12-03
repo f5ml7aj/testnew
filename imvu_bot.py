@@ -108,18 +108,6 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-def click_follow_button():
-    try:
-        # زيادة وقت الانتظار هنا للتأكد من أن العنصر جاهز
-        follow_button = WebDriverWait(driver, 30).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB button"))
-        )
-        save_click_location_screenshot(follow_button, "follow_button_found")
-        human_like_delay()
-        follow_button.click()
-        print("تم الضغط على زر Follow.")
-    except Exception as e:
-        print(f"خطأ أثناء الضغط على زر Follow: {e}")
 
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
