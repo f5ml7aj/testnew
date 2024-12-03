@@ -149,19 +149,22 @@ def login(account):
         login_button.click()
         save_click_location_screenshot(login_button, "login_clicked")
 
+        # الانتظار لمدة 4 ثوانٍ بعد الضغط على زر "تسجيل الدخول"
+        time.sleep(4)
+
+        # تخطي نافذة تفضيلات الخصوصية بعد 4 ثوانٍ
+        skip_privacy_preferences()
+
         # الانتظار للتأكد من تسجيل الدخول بنجاح
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
-        
-        skip_privacy_preferences()
-        
+
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
-    skip_privacy_preferences()
 
 def go_to_next_page():
     """الانتقال إلى صفحة معينة بعد تسجيل الدخول."""
