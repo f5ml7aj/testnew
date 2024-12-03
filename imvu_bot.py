@@ -65,13 +65,17 @@ def skip_cookies_if_present():
         cookie_button.click()  # الضغط على الزر
         time.sleep(3)  # الانتظار 3 ثوانٍ بعد الضغط
 
-        # فتح صفحة تسجيل الدخول
+        # الانتقال إلى صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com/welcome/login/")
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+
+        # الانتظار حتى يتم تحميل عنصر محدد يشير إلى اكتمال الصفحة
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.NAME, "avatarname"))  # انتظار حقل الإدخال "avatarname"
+        )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "login_page_loaded")
         print("تم الضغط على زر قبول الكوكيز، وتم فتح صفحة تسجيل الدخول.")
     except Exception as e:
-        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
+        print(f"خطأ أثناء التعامل مع نافذة الكوكيز أو فتح صفحة تسجيل الدخول: {e}")
 
 
 def login(account):
