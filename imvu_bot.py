@@ -50,10 +50,18 @@ def save_click_location_screenshot(element, step_name):
     screenshot_counter += 1
     print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
 
-# بيانات تسجيل الدخول
-accounts = [
-    {"email": "your_email@example.com", "password": "your_password"}  # أضف الحسابات هنا
-]
+def load_accounts_from_file(file_path):
+    """تحميل الحسابات من ملف نصي."""
+    accounts = []
+    try:
+        with open(file_path, "r") as file:
+            for line in file.readlines():
+                email, password = line.strip().split(":")
+                accounts.append({"email": email, "password": password})
+        print(f"تم تحميل {len(accounts)} حسابات من الملف.")
+    except Exception as e:
+        print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
+    return accounts
 
 def skip_cookies_if_present():
     try:
@@ -130,6 +138,9 @@ def login(account):
 
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
+
+# تحميل الحسابات من الملف
+accounts = load_accounts_from_file("accounts.txt")
 
 # تسجيل الدخول لكل حساب
 for account in accounts:
