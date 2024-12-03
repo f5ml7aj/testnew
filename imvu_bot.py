@@ -80,12 +80,14 @@ def skip_cookies_if_present():
 def skip_privacy_preferences():
     try:
         # البحث عن زر "I Accept" باستخدام الـ ID
-        accept_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))
+        accept_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))
         )
         save_click_location_screenshot(accept_button, "accept_button_found")  # لقطة قبل الضغط
         accept_button.click()  # الضغط على زر "I Accept"
-        time.sleep(3)  # الانتظار لفترة أطول للتأكد من تحميل الصفحة بشكل كامل
+        WebDriverWait(driver, 5).until(
+            EC.staleness_of(accept_button)  # التأكد من أن الزر اختفى
+        )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_accept_button_click")  # لقطة بعد الضغط
         print("تم الضغط على زر 'I Accept'.")
         
@@ -96,7 +98,6 @@ def skip_privacy_preferences():
 
     except Exception as e:
         print(f"حدث خطأ أثناء التعامل مع النافذة: {e}")
-
         
 def click_sign_in_button():
     try:
@@ -149,8 +150,9 @@ def login(account):
         login_button.click()
         save_click_location_screenshot(login_button, "login_clicked")
 
-        # الانتظار لمدة 4 ثوانٍ بعد الضغط على زر "تسجيل الدخول"
-        time.sleep(4)
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
 
         # تخطي نافذة تفضيلات الخصوصية بعد 4 ثوانٍ
         skip_privacy_preferences()
