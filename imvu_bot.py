@@ -77,6 +77,7 @@ def skip_cookies_if_present():
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
 
+
 def click_sign_in_button():
     try:
         # البحث عن زر "Entrar" والضغط عليه
