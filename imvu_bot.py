@@ -97,7 +97,7 @@ def login(account):
 
 # بيانات تسجيل الدخول
 accounts = [
-    {"email": "your_email@example.com", "password": "your_password"}
+    {"email": "conq1@gmail.com", "password": "Moammedmax2"}
 ]
 
 # تسجيل الدخول لكل حساب
