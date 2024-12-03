@@ -155,14 +155,16 @@ def go_to_next_page():
     try:
         # الانتقال إلى الصفحة
         driver.get("https://www.imvu.com/next/av/L7AJ/")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        
+        # الانتظار حتى يتم تحميل الصفحة بالكامل
+        wait_for_page_to_load()
+
+        # الانتظار لمدة 10 ثوانٍ بعد تحميل الصفحة
+        time.sleep(10)
 
         # التقاط لقطة شاشة للصفحة بعد الانتقال
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_navigating_to_next_page")
         print("تم الانتقال إلى صفحة IMVU بنجاح وتم التقاط لقطة شاشة.")
-        
-        # الانتظار قليلاً
-        time.sleep(5)
         
     except Exception as e:
         print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
