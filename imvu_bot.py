@@ -155,7 +155,7 @@ accounts = load_accounts_from_file("accounts.txt")
 # تسجيل الدخول لكل حساب
 for account in accounts:
     login(account)
-    go_to_next_page()
+
 
 # إغلاق المتصفح
 driver.quit()
