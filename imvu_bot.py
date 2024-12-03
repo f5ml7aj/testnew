@@ -100,7 +100,24 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print(f"حدث خطأ أثناء انتظار تحميل الصفحة: {e}")
+        
+def take_screenshots_after_login(duration=30):
+    """أخذ لقطات شاشة متعددة بعد تسجيل الدخول."""
+    global screenshot_counter
+    end_time = time.time() + duration  # تحديد الوقت النهائي
 
+    while time.time() < end_time:
+        # التقاط لقطة شاشة
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_after_login.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم حفظ لقطة الشاشة: {screenshot_path}")
+        
+        # زيادة عداد لقطات الشاشة
+        screenshot_counter += 1
+        
+        # الانتظار لمدة 1 ثانية قبل التقاط الصورة التالية
+        time.sleep(1)
+        
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
@@ -142,6 +159,8 @@ def login(account):
         wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بعد تسجيل الدخول
 
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
+        
+       take_screenshots_after_login(duration=30)
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
