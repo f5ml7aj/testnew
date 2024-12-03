@@ -165,7 +165,7 @@ def take_screenshot_after_delay():
 
 def take_screenshot_after_delay_3_minutes():
     """أخذ لقطة شاشة بعد 3 دقائق من فتح الصفحة الجديدة."""
-    human_like_delay(180, 180)  # تأخير لمدة 3 دقائق (180 ثانية)
+    human_like_delay(720, 720)  # تأخير لمدة 3 دقائق (180 ثانية)
     screenshot_path = f"screenshots/{screenshot_counter:04d}_post_page_open.png"
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 3 دقائق وحفظها في: {screenshot_path}")
