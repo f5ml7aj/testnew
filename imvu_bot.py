@@ -91,12 +91,22 @@ def click_sign_in_button():
     except Exception as e:
         print(f"خطأ أثناء الضغط على زر 'Entrar': {e}")
 
+def wait_for_page_to_load():
+    """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
+    try:
+        WebDriverWait(driver, 20).until(
+            lambda d: d.execute_script('return document.readyState') == 'complete'
+        )
+        print("تم تحميل الصفحة بالكامل.")
+    except Exception as e:
+        print(f"حدث خطأ أثناء انتظار تحميل الصفحة: {e}")
+
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         # افتح صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بالكامل
 
         # تخطي نافذة الكوكيز إذا ظهرت
         skip_cookies_if_present()
@@ -129,15 +139,16 @@ def login(account):
         save_click_location_screenshot(login_button, "login_clicked")
 
         # الانتظار للتأكد من تسجيل الدخول بنجاح
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
+        wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بعد تسجيل الدخول
+
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
+
+# باقي الكود كما هو...
 
 def go_to_next_page():
     """الانتقال إلى صفحة معينة بعد تسجيل الدخول."""
