@@ -20,7 +20,7 @@ chrome_options.add_argument("--start-maximized")  # تشغيل المتصفح ب
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # تعطيل كاشف الأتمتة
 chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")  # محاكاة متصفح حقيقي
 chrome_options.add_argument("--remote-debugging-port=9222")  # تعطيل اتصال DevTools
-chrome_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
+
 
 # إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
@@ -102,7 +102,7 @@ def click_sign_in_button():
 def wait_for_page_to_load():
     """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
     try:
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(driver, 40).until(
             lambda d: d.execute_script('return document.readyState') == 'complete'
         )
         print("تم تحميل الصفحة بالكامل.")
