@@ -148,11 +148,11 @@ def go_to_next_page():
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
         # الانتظار لمدة 5 ثواني قبل التقاط لقطة الشاشة
-        time.sleep(5)
+        time.sleep(10)
 
         # التقاط لقطة شاشة للصفحة بعد الانتقال
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_waiting_on_page")
-        print("تم الانتظار لمدة 5 ثواني وتم التقاط لقطة الشاشة.")
+        print("تم الانتظار لمدة 10 ثواني وتم التقاط لقطة الشاشة.")
 
     except Exception as e:
         print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
