@@ -69,6 +69,19 @@ def skip_cookies_if_present():
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
 
+def click_sign_in_button():
+    try:
+        # البحث عن زر "Entrar" والضغط عليه
+        sign_in_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "ul.secondary-nav button.sign-in"))
+        )
+        save_click_location_screenshot(sign_in_button, "sign_in_button_found")  # لقطة قبل الضغط
+        sign_in_button.click()  # الضغط على زر "Entrar"
+        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_sign_in_button_click")  # لقطة بعد الضغط
+        print("تم الضغط على زر 'Entrar'.")
+    except Exception as e:
+        print(f"خطأ أثناء الضغط على زر 'Entrar': {e}")
 
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
@@ -76,10 +89,12 @@ def login(account):
         # افتح صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com")
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        time.sleep(3)
 
         # تخطي نافذة الكوكيز إذا ظهرت
         skip_cookies_if_present()
+
+        # الضغط على زر "Entrar"
+        click_sign_in_button()
 
         # التقاط لقطة شاشة لصفحة تسجيل الدخول
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "page_loaded")
@@ -121,4 +136,4 @@ for account in accounts:
     login(account)
 
 # إغلاق المتصفح
-driver.quit() 
+driver.quit()
