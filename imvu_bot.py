@@ -85,12 +85,18 @@ def skip_privacy_preferences():
         )
         save_click_location_screenshot(accept_button, "accept_button_found")  # لقطة قبل الضغط
         accept_button.click()  # الضغط على زر "I Accept"
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
+        time.sleep(3)  # الانتظار لفترة أطول للتأكد من تحميل الصفحة بشكل كامل
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_accept_button_click")  # لقطة بعد الضغط
         print("تم الضغط على زر 'I Accept'.")
         
+        # الانتظار للتحقق من ظهور العناصر بعد الضغط
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+
     except Exception as e:
         print(f"حدث خطأ أثناء التعامل مع النافذة: {e}")
+
         
 def click_sign_in_button():
     try:
@@ -148,6 +154,8 @@ def login(account):
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
+        
+        skip_privacy_preferences()
         
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
