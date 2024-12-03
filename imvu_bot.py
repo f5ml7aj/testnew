@@ -76,29 +76,7 @@ def skip_cookies_if_present():
         print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
-        
-def skip_privacy_preferences():
-    try:
-        # البحث عن زر "I Accept" باستخدام الـ ID
-        accept_button = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))
-        )
-        save_click_location_screenshot(accept_button, "accept_button_found")  # لقطة قبل الضغط
-        accept_button.click()  # الضغط على زر "I Accept"
-        WebDriverWait(driver, 5).until(
-            EC.staleness_of(accept_button)  # التأكد من أن الزر اختفى
-        )
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_accept_button_click")  # لقطة بعد الضغط
-        print("تم الضغط على زر 'I Accept'.")
-        
-        # الانتظار للتحقق من ظهور العناصر بعد الضغط
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
 
-    except Exception as e:
-        print(f"حدث خطأ أثناء التعامل مع النافذة: {e}")
-        
 def click_sign_in_button():
     try:
         # البحث عن زر "Entrar" والضغط عليه
@@ -150,13 +128,6 @@ def login(account):
         login_button.click()
         save_click_location_screenshot(login_button, "login_clicked")
 
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-
-        # تخطي نافذة تفضيلات الخصوصية بعد 4 ثوانٍ
-        skip_privacy_preferences()
-
         # الانتظار للتأكد من تسجيل الدخول بنجاح
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
@@ -175,15 +146,15 @@ def go_to_next_page():
         driver.get("https://www.imvu.com/next/av/L7AJ/")
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
-        # الانتظار لمدة 5 ثواني قبل التقاط لقطة الشاشة
-        time.sleep(10)
-
         # التقاط لقطة شاشة للصفحة بعد الانتقال
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_waiting_on_page")
-        print("تم الانتظار لمدة 10 ثواني وتم التقاط لقطة الشاشة.")
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_navigating_to_next_page")
+        print("تم الانتقال إلى صفحة IMVU بنجاح وتم التقاط لقطة شاشة.")
+        
+        # الانتظار قليلاً
+        time.sleep(5)
+        
     except Exception as e:
         print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
-
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
