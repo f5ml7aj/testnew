@@ -20,7 +20,7 @@ chrome_options.add_argument("--start-maximized")  # تشغيل المتصفح ب
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # تعطيل كاشف الأتمتة
 chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")  # محاكاة متصفح حقيقي
 chrome_options.add_argument("--remote-debugging-port=9222")  # تعطيل اتصال DevTools
-
+chrome_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
 # إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
@@ -74,17 +74,16 @@ def load_accounts_from_file(file_path):
 
 def skip_cookies_if_present():
     try:
-        # البحث عن زر قبول الكوكيز باستخدام الـ Class
         cookie_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.accept-cookies"))
         )
-        save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
-        cookie_button.click()  # الضغط على الزر
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
+        save_click_location_screenshot(cookie_button, "cookie_button_found")
+        human_like_delay()
+        cookie_button.click()
+        human_like_delay()
         print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
-        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
+        print("لم يتم العثور على زر الكوكيز، أو تم التعامل معه مسبقًا.")
 
 def click_sign_in_button():
     try:
@@ -102,28 +101,18 @@ def click_sign_in_button():
 def wait_for_page_to_load():
     """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
     try:
-        WebDriverWait(driver, 40).until(
+        WebDriverWait(driver, 20).until(
             lambda d: d.execute_script('return document.readyState') == 'complete'
         )
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
-def save_full_page_screenshot(step_name):
-    """حفظ لقطة شاشة كاملة للصفحة."""
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_{step_name}_full_page.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"تم حفظ لقطة الشاشة الكاملة: {screenshot_path}")
-    screenshot_counter += 1
-
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         driver.get("https://pt.secure.imvu.com")
         wait_for_page_to_load()
-
-        # حفظ لقطة شاشة كاملة للصفحة قبل أي تفاعل
-        save_full_page_screenshot("initial_page_load")
 
         # تخطي نافذة الكوكيز
         skip_cookies_if_present()
@@ -158,26 +147,8 @@ def login(account):
         wait_for_page_to_load()
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
-
-        # بعد تسجيل الدخول، الانتقال إلى الصفحة المطلوبة
-        driver.get("https://www.imvu.com/next/av/L7AJ/")  # الانتقال إلى الرابط المحدد
-        wait_for_page_to_load()
-
-        # حفظ لقطة شاشة للصفحة بعد تسجيل الدخول
-        save_full_page_screenshot("post_login_page_load")
-
-        # البحث عن الزر Follow والضغط عليه
-        follow_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB button"))
-        )
-        save_click_location_screenshot(follow_button, "follow_button_found")
-        human_like_delay()
-        follow_button.click()
-        print("تم الضغط على زر Follow.")
-
     except Exception as e:
-        print(f"خطأ أثناء تسجيل الدخول أو التفاعل مع الزر: {e}")
-        save_full_page_screenshot("error_occurred")
+        print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
