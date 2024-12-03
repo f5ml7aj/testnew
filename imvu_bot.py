@@ -80,7 +80,6 @@ def login(account):
         # تخطي نافذة الكوكيز إذا ظهرت
         skip_cookies_if_present()
 
-        # العودة إلى صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com/welcome/login/")  # العودة إلى صفحة تسجيل الدخول بعد الضغط على الكوكيز
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_return_to_login_page")  # لقطة بعد العودة للصفحة
