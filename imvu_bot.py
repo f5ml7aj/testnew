@@ -109,11 +109,21 @@ def wait_for_page_to_load():
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
+def save_full_page_screenshot(step_name):
+    """حفظ لقطة شاشة كاملة للصفحة."""
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_{step_name}_full_page.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم حفظ لقطة الشاشة الكاملة: {screenshot_path}")
+    screenshot_counter += 1
+
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         driver.get("https://pt.secure.imvu.com")
         wait_for_page_to_load()
+
+        # حفظ لقطة شاشة كاملة للصفحة قبل أي تفاعل
+        save_full_page_screenshot("initial_page_load")
 
         # تخطي نافذة الكوكيز
         skip_cookies_if_present()
@@ -153,6 +163,9 @@ def login(account):
         driver.get("https://www.imvu.com/next/av/L7AJ/")  # الانتقال إلى الرابط المحدد
         wait_for_page_to_load()
 
+        # حفظ لقطة شاشة للصفحة بعد تسجيل الدخول
+        save_full_page_screenshot("post_login_page_load")
+
         # البحث عن الزر Follow والضغط عليه
         follow_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB button"))
@@ -164,6 +177,7 @@ def login(account):
 
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول أو التفاعل مع الزر: {e}")
+        save_full_page_screenshot("error_occurred")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
