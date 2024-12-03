@@ -147,15 +147,15 @@ def login(account):
         wait_for_page_to_load()
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
-
-        # التوجه إلى الصفحة الجديدة بعد تسجيل الدخول
+    except Exception as e:
+        print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
+        
         driver.get("https://www.imvu.com/next/av/L7AJ/")
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
-  
 def take_screenshot_after_delay():
     """أخذ لقطة شاشة بعد 15 ثانية من تسجيل الدخول."""
     human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
