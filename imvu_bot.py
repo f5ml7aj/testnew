@@ -76,28 +76,7 @@ def skip_cookies_if_present():
         print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
-        
-def skip_privacy_preferences():
-    try:
-        # البحث عن زر "I Accept" باستخدام الـ ID
-        accept_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))
-        )
-        save_click_location_screenshot(accept_button, "accept_button_found")  # لقطة قبل الضغط
-        accept_button.click()  # الضغط على زر "I Accept"
-        time.sleep(3)  # الانتظار لفترة أطول للتأكد من تحميل الصفحة بشكل كامل
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_accept_button_click")  # لقطة بعد الضغط
-        print("تم الضغط على زر 'I Accept'.")
-        
-        # الانتظار للتحقق من ظهور العناصر بعد الضغط
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
 
-    except Exception as e:
-        print(f"حدث خطأ أثناء التعامل مع النافذة: {e}")
-
-        
 def click_sign_in_button():
     try:
         # البحث عن زر "Entrar" والضغط عليه
@@ -112,12 +91,22 @@ def click_sign_in_button():
     except Exception as e:
         print(f"خطأ أثناء الضغط على زر 'Entrar': {e}")
 
+def wait_for_page_to_load():
+    """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
+    try:
+        WebDriverWait(driver, 20).until(
+            lambda d: d.execute_script('return document.readyState') == 'complete'
+        )
+        print("تم تحميل الصفحة بالكامل.")
+    except Exception as e:
+        print(f"حدث خطأ أثناء انتظار تحميل الصفحة: {e}")
+
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         # افتح صفحة تسجيل الدخول
         driver.get("https://pt.secure.imvu.com")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بالكامل
 
         # تخطي نافذة الكوكيز إذا ظهرت
         skip_cookies_if_present()
@@ -150,18 +139,16 @@ def login(account):
         save_click_location_screenshot(login_button, "login_clicked")
 
         # الانتظار للتأكد من تسجيل الدخول بنجاح
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
+        wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بعد تسجيل الدخول
+
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
-        
-        skip_privacy_preferences()
-        
+
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
-    skip_privacy_preferences()
+
+# باقي الكود كما هو...
 
 def go_to_next_page():
     """الانتقال إلى صفحة معينة بعد تسجيل الدخول."""
@@ -170,15 +157,15 @@ def go_to_next_page():
         driver.get("https://www.imvu.com/next/av/L7AJ/")
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
-        # الانتظار لمدة 5 ثواني قبل التقاط لقطة الشاشة
-        time.sleep(10)
-
         # التقاط لقطة شاشة للصفحة بعد الانتقال
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_waiting_on_page")
-        print("تم الانتظار لمدة 10 ثواني وتم التقاط لقطة الشاشة.")
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_navigating_to_next_page")
+        print("تم الانتقال إلى صفحة IMVU بنجاح وتم التقاط لقطة شاشة.")
+        
+        # الانتظار قليلاً
+        time.sleep(5)
+        
     except Exception as e:
         print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
-
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
