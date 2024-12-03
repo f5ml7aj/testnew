@@ -148,26 +148,6 @@ def login(account):
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
 
-# باقي الكود كما هو...
-
-def go_to_next_page():
-    """الانتقال إلى صفحة معينة بعد تسجيل الدخول."""
-    try:
-        # الانتقال إلى الصفحة
-        driver.get("https://www.imvu.com/next/av/L7AJ/")
-        
-        # الانتظار حتى يتم تحميل الصفحة بالكامل
-        wait_for_page_to_load()
-
-        # الانتظار لمدة 10 ثوانٍ بعد تحميل الصفحة
-        time.sleep(10)
-
-        # التقاط لقطة شاشة للصفحة بعد الانتقال
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_navigating_to_next_page")
-        print("تم الانتقال إلى صفحة IMVU بنجاح وتم التقاط لقطة شاشة.")
-        
-    except Exception as e:
-        print(f"حدث خطأ أثناء الانتقال إلى الصفحة: {e}")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
