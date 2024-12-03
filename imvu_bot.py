@@ -9,54 +9,56 @@ from PIL import Image, ImageDraw
 import os
 import time
 import random
+import traceback
 
-# إعداد متصفح Chrome
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--disable-extensions")
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-logging")
-chrome_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # تعطيل كاشف الأتمتة
-chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")  # محاكاة متصفح حقيقي
-
-# إعداد خدمة Chrome
-service = Service(ChromeDriverManager().install())
-
-# تهيئة المتصفح
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+# إعداد المتصفح
+def setup_driver():
+    chrome_options = Options()
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-logging")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--incognito")  # وضع التصفح المتخفي
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36"
+    )
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
     os.makedirs("screenshots")
 
-screenshot_counter = 1  # عداد لقطات الشاشة
+screenshot_counter = 1
 
 def human_like_delay(min_delay=2, max_delay=5):
     """إضافة تأخير عشوائي لمحاكاة التصفح البشري."""
     time.sleep(random.uniform(min_delay, max_delay))
 
-def save_click_location_screenshot(element, step_name):
+def save_click_location_screenshot(driver, element, step_name):
     """حفظ لقطة شاشة مع تحديد مكان الضغط."""
     global screenshot_counter
-    location = element.location
-    size = element.size
-    x = int(location["x"] + size["width"] / 2)
-    y = int(location["y"] + size["height"] / 2)
+    try:
+        location = element.location
+        size = element.size
+        x = int(location["x"] + size["width"] / 2)
+        y = int(location["y"] + size["height"] / 2)
 
-    # التقاط لقطة الشاشة
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_{step_name}.png"
-    driver.save_screenshot(screenshot_path)
+        # التقاط لقطة الشاشة
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_{step_name}.png"
+        driver.save_screenshot(screenshot_path)
 
-    # فتح الصورة ورسم دائرة على مكان الضغط
-    image = Image.open(screenshot_path)
-    draw = ImageDraw.Draw(image)
-    radius = 10
-    draw.ellipse((x - radius, y - radius, x + radius, y + radius), outline="red", width=3)
-    image.save(screenshot_path)
-    screenshot_counter += 1
-    print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
+        # رسم دائرة على مكان الضغط
+        image = Image.open(screenshot_path)
+        draw = ImageDraw.Draw(image)
+        radius = 10
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), outline="red", width=3)
+        image.save(screenshot_path)
+        screenshot_counter += 1
+        print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
+    except Exception as e:
+        print(f"خطأ أثناء حفظ لقطة الشاشة: {e}")
 
 def load_accounts_from_file(file_path):
     """تحميل الحسابات من ملف نصي."""
@@ -71,34 +73,33 @@ def load_accounts_from_file(file_path):
         print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
     return accounts
 
-def skip_cookies_if_present():
+def skip_cookies_if_present(driver):
     try:
-        # البحث عن زر قبول الكوكيز باستخدام الـ Class
         cookie_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.accept-cookies"))
         )
-        save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
-        cookie_button.click()  # الضغط على الزر
-        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
-        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
+        save_click_location_screenshot(driver, cookie_button, "cookie_button_found")
+        human_like_delay()
+        cookie_button.click()
+        human_like_delay()
         print("تم الضغط على زر قبول الكوكيز.")
-    except Exception as e:
-        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
-        
-def click_sign_in_button():
+    except Exception:
+        print("لم يتم العثور على زر الكوكيز أو تم تخطيه مسبقًا.")
+
+def click_sign_in_button(driver):
     try:
         sign_in_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "ul.secondary-nav button.sign-in"))
         )
-        save_click_location_screenshot(sign_in_button, "sign_in_button_found")
+        save_click_location_screenshot(driver, sign_in_button, "sign_in_button_found")
         human_like_delay()
         sign_in_button.click()
         human_like_delay()
         print("تم الضغط على زر 'Entrar'.")
-    except Exception as e:
+    except Exception:
         print("لم يتم العثور على زر 'Entrar'.")
 
-def wait_for_page_to_load():
+def wait_for_page_to_load(driver):
     """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
     try:
         WebDriverWait(driver, 20).until(
@@ -108,24 +109,24 @@ def wait_for_page_to_load():
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
-def login(account):
+def login(driver, account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         driver.get("https://pt.secure.imvu.com")
-        wait_for_page_to_load()
+        wait_for_page_to_load(driver)
 
         # تخطي نافذة الكوكيز
-        skip_cookies_if_present()
+        skip_cookies_if_present(driver)
 
         # الضغط على زر تسجيل الدخول
-        click_sign_in_button()
+        click_sign_in_button(driver)
 
         # إدخال الإيميل
         email_field = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.NAME, "avatarname"))
         )
         email_field.send_keys(account["email"])
-        save_click_location_screenshot(email_field, "email_entered")
+        save_click_location_screenshot(driver, email_field, "email_entered")
         human_like_delay()
 
         # إدخال كلمة المرور
@@ -133,29 +134,32 @@ def login(account):
             EC.presence_of_element_located((By.NAME, "password"))
         )
         password_field.send_keys(account["password"])
-        save_click_location_screenshot(password_field, "password_entered")
+        save_click_location_screenshot(driver, password_field, "password_entered")
         human_like_delay()
 
         # الضغط على زر تسجيل الدخول
         login_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary"))
         )
-        save_click_location_screenshot(login_button, "login_clicked")
+        save_click_location_screenshot(driver, login_button, "login_clicked")
         human_like_delay()
         login_button.click()
 
-        wait_for_page_to_load()
-
+        wait_for_page_to_load(driver)
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
     except Exception as e:
-        print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
+        print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب {account['email']}: {e}")
+        traceback.print_exc()
 
-# تحميل الحسابات من الملف
-accounts = load_accounts_from_file("accounts.txt")
+def main():
+    accounts = load_accounts_from_file("accounts.txt")
+    for account in accounts:
+        driver = setup_driver()
+        try:
+            login(driver, account)
+        finally:
+            driver.quit()
+            print("تم إغلاق المتصفح.")
 
-# تسجيل الدخول لكل حساب
-for account in accounts:
-    login(account)
-
-# إغلاق المتصفح
-driver.quit()
+if __name__ == "__main__":
+    main()
