@@ -107,13 +107,7 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-def take_screenshot_after_delay():
-    """أخذ لقطة شاشة بعد 15 ثانية من تسجيل الدخول."""
-    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
-
+        
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
@@ -155,6 +149,13 @@ def login(account):
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
+        
+def take_screenshot_after_delay():
+    """أخذ لقطة شاشة بعد 15 ثانية من تسجيل الدخول."""
+    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
