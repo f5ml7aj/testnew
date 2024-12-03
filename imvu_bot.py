@@ -147,15 +147,29 @@ def login(account):
         wait_for_page_to_load()
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
+
+        # التوجه إلى الصفحة الجديدة بعد تسجيل الدخول
+        driver.get("https://www.imvu.com/next/av/L7AJ/")
+        wait_for_page_to_load()
+        print("تم التوجه إلى الصفحة الجديدة.")
+
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
-        
+  
 def take_screenshot_after_delay():
     """أخذ لقطة شاشة بعد 15 ثانية من تسجيل الدخول."""
     human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
     screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+
+def take_screenshot_after_delay_3_minutes():
+    """أخذ لقطة شاشة بعد 3 دقائق من فتح الصفحة الجديدة."""
+    human_like_delay(180, 180)  # تأخير لمدة 3 دقائق (180 ثانية)
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_page_open.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 3 دقائق وحفظها في: {screenshot_path}")
+
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -164,5 +178,6 @@ accounts = load_accounts_from_file("accounts.txt")
 for account in accounts:
     login(account)
 take_screenshot_after_delay()
+take_screenshot_after_delay_3_minutes() 
 # إغلاق المتصفح
 driver.quit()
