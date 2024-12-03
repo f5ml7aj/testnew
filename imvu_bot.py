@@ -92,7 +92,7 @@ def click_sign_in_button():
         print(f"خطأ أثناء الضغط على زر 'Entrar': {e}")
 
 def wait_for_page_to_load():
-    """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
+    """انتظار تحميل الصفحة بالكامل باستخدام ready State."""
     try:
         WebDriverWait(driver, 20).until(
             lambda d: d.execute_script('return document.readyState') == 'complete'
@@ -100,7 +100,7 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print(f"حدث خطأ أثناء انتظار تحميل الصفحة: {e}")
-        
+
 def take_screenshots_after_login(duration=30):
     """أخذ لقطات شاشة متعددة بعد تسجيل الدخول."""
     global screenshot_counter
@@ -117,7 +117,7 @@ def take_screenshots_after_login(duration=30):
         
         # الانتظار لمدة 1 ثانية قبل التقاط الصورة التالية
         time.sleep(1)
-        
+
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
@@ -159,14 +159,14 @@ def login(account):
         wait_for_page_to_load()  # الانتظار حتى يتم تحميل الصفحة بعد تسجيل الدخول
 
         save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_login")
-        
-       take_screenshots_after_login(duration=30)
+
+        # أخذ لقطات شاشة متعددة بعد تسجيل الدخول
+        take_screenshots_after_login(duration=30)
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
 
     except Exception as e:
         print(f"حدث خطأ أثناء تسجيل الدخول: {e}")
-
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -174,7 +174,6 @@ accounts = load_accounts_from_file("accounts.txt")
 # تسجيل الدخول لكل حساب
 for account in accounts:
     login(account)
-
 
 # إغلاق المتصفح
 driver.quit()
