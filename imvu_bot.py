@@ -74,16 +74,17 @@ def load_accounts_from_file(file_path):
 
 def skip_cookies_if_present():
     try:
+        # البحث عن زر قبول الكوكيز باستخدام الـ Class
         cookie_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.accept-cookies"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary.accept-cookies"))
         )
-        save_click_location_screenshot(cookie_button, "cookie_button_found")
-        human_like_delay()
-        cookie_button.click()
-        human_like_delay()
+        save_click_location_screenshot(cookie_button, "cookie_button_found")  # لقطة قبل الضغط
+        cookie_button.click()  # الضغط على الزر
+        time.sleep(1)  # الانتظار للتأكد من تنفيذ الضغط
+        save_click_location_screenshot(driver.find_element(By.TAG_NAME, "body"), "after_cookie_button_click")  # لقطة بعد الضغط
         print("تم الضغط على زر قبول الكوكيز.")
     except Exception as e:
-        print("لم يتم العثور على زر الكوكيز، أو تم التعامل معه مسبقًا.")
+        print(f"خطأ أثناء التعامل مع نافذة الكوكيز: {e}")
 
 def click_sign_in_button():
     try:
