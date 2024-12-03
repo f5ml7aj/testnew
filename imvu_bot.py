@@ -11,15 +11,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # إعداد متصفح Chrome
 chrome_options = Options()
-# إزالة السطر التالي لتشغيل المتصفح مع واجهة المستخدم
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")  # تشغيل المتصفح في وضع خفي
 chrome_options.add_argument("--disable-extensions")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-logging")
-chrome_options.add_argument("--disable-dev-shm-usage")  # استخدام التخزين المؤقت في حالة قلة الذاكرة
-chrome_options.add_argument("--remote-debugging-port=9222")  # لتصحيح الأخطاء
-
 
 # إعداد خدمة Chrome
 service = Service(ChromeDriverManager().install())
@@ -82,11 +78,12 @@ def skip_cookies_if_present():
         print(f"خطأ أثناء التعامل مع نافذة الكوكيز أو فتح صفحة تسجيل الدخول: {e}")
 
 
+
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         # افتح صفحة تسجيل الدخول
-        driver.get("https://pt.secure.imvu.com")
+        driver.get("https://pt.secure.imvu.com/welcome/login/")
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
