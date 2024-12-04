@@ -152,8 +152,8 @@ def login(account):
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
-def click_follow_button():
-    """البحث عن زر Follow والضغط عليه."""
+def click_follow_button_multiple_times():
+    """البحث عن زر Follow والضغط عليه عدة مرات."""
     try:
         # العثور على الزر باستخدام الـ CSS selector
         follow_button = WebDriverWait(driver, 10).until(
@@ -162,11 +162,15 @@ def click_follow_button():
         save_click_location_screenshot(follow_button, "follow_button_found")
         human_like_delay()
 
-        # التأكد من أن الزر قابل للنقر
+        # استخدام ActionChains لتنفيذ الضغط المتعدد
         action = ActionChains(driver)
-        action.move_to_element(follow_button).click().perform()  # تحريك الماوس والضغط على الزر
-        human_like_delay()
-        print("تم الضغط على زر 'Follow'.")
+        
+        # تحريك الماوس فوق الزر والضغط عليه عدة مرات (مثلاً 3 مرات)
+        for _ in range(3):
+            action.move_to_element(follow_button).click().perform()
+            human_like_delay(1, 2)  # إضافة تأخير عشوائي بين النقرات
+
+        print("تم الضغط على زر 'Follow' عدة مرات.")
 
         # الانتظار لتغيير الزر إلى "Following"
         WebDriverWait(driver, 10).until(
@@ -181,7 +185,6 @@ def click_follow_button():
         
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-
         
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
