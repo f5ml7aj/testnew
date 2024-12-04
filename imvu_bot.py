@@ -10,6 +10,8 @@ import os
 import time
 import random
 
+
+
 # إعداد متصفح Firefox
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
@@ -23,7 +25,7 @@ firefox_options.headless = True  # تشغيل المتصفح بدون واجهة
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
-
+service = Service('/path/to/geckodriver')  
 # تهيئة المتصفح
 driver = webdriver.Firefox(service=service, options=firefox_options)
 
