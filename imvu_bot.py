@@ -11,12 +11,6 @@ import time
 import random
 
 # إعداد متصفح Firefox
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
-from webdriver_manager.firefox import GeckoDriverManager
-
-# إعداد متصفح Firefox
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
 firefox_options.add_argument("--disable-gpu")
@@ -30,9 +24,6 @@ service = Service(GeckoDriverManager().install())
 
 # تهيئة المتصفح
 driver = webdriver.Firefox(service=service, options=firefox_options)
-
-# باقي الكود يبقى كما هو
-
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
@@ -160,20 +151,26 @@ def login(account):
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
+def open_url_from_file(file_path):
+    """فتح الرابط الموجود في ملف."""
+    try:
+        with open(file_path, "r") as file:
+            url = file.readline().strip()
+            if url:
+                driver.get(url)
+                wait_for_page_to_load()
+                print(f"تم فتح الرابط: {url}")
+            else:
+                print("الرابط غير موجود في الملف.")
+    except Exception as e:
+        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
+
 def take_screenshot_after_delay():
-    """أخذ لقطة شاشة بعد 15 ثانية من تسجيل الدخول."""
+    """أخذ لقطة شاشة بعد تسجيل الدخول."""
     human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
     screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
-
-def take_screenshot_after_delay_3_minutes():
-    """أخذ لقطة شاشة بعد 3 دقائق من فتح الصفحة الجديدة."""
-    human_like_delay(180, 180)  # تأخير لمدة 3 دقائق (180 ثانية)
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_page_open.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"تم أخذ لقطة شاشة بعد 3 دقائق وحفظها في: {screenshot_path}")
-
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -181,7 +178,9 @@ accounts = load_accounts_from_file("accounts.txt")
 # تسجيل الدخول لكل حساب
 for account in accounts:
     login(account)
-take_screenshot_after_delay()
-take_screenshot_after_delay_3_minutes() 
+    # فتح الرابط من الملف بعد تسجيل الدخول
+    open_url_from_file("link.txt")  # قم بتحديد مسار الملف الذي يحتوي على الرابط
+    take_screenshot_after_delay()
+
 # إغلاق المتصفح
 driver.quit()
