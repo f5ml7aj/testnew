@@ -5,6 +5,7 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageDraw
 import os
 import time
@@ -160,7 +161,10 @@ def click_follow_button():
         )
         save_click_location_screenshot(follow_button, "follow_button_found")
         human_like_delay()
-        follow_button.click()
+
+        # التأكد من أن الزر قابل للنقر باستخدام ActionChains
+        action = ActionChains(driver)
+        action.move_to_element(follow_button).click().perform()  # تحريك الماوس والضغط على الزر
         human_like_delay()
         print("تم الضغط على زر 'Follow'.")
 
@@ -171,7 +175,7 @@ def click_follow_button():
         
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-
+        
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
     try:
