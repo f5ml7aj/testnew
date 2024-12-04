@@ -194,12 +194,22 @@ def click_follow_button_with_delay():
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
         )
         print("تم تغيير الزر إلى 'Following' بنجاح.")
-
+    
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
         screenshot_path = f"screenshots/{screenshot_counter:04d}_error_follow_button.png"
         driver.save_screenshot(screenshot_path)
         print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
+
+is_following = driver.execute_script("""
+    const button = document.querySelector("div.people-hash-FAB.Following .button-wrapper");
+    return button !== null;
+""")
+
+if is_following:
+    print("تم المتابعة بنجاح.")
+else:
+    print("لم يتم تأكيد المتابعة.")
 
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
