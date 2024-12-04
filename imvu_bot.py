@@ -1,30 +1,30 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.edge.options import Options
-from selenium.webdriver.edge.service import Service
-from webdriver_manager.microsoft import EdgeDriverManager
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageDraw
 import os
 import time
 import random
- 
-# إعداد متصفح Edge
-edge_options = Options()
-edge_options.add_argument("--disable-extensions")
-edge_options.add_argument("--disable-gpu")
-edge_options.add_argument("--no-sandbox")
-edge_options.add_argument("--disable-logging")
-edge_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-edge_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
-# إعداد خدمة Edge
-service = Service(EdgeDriverManager().install())
+# إعداد متصفح Firefox
+firefox_options = Options()
+firefox_options.add_argument("--disable-extensions")
+firefox_options.add_argument("--disable-gpu")
+firefox_options.add_argument("--no-sandbox")
+firefox_options.add_argument("--disable-logging")
+firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
+firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
+
+# إعداد خدمة Firefox
+service = Service(GeckoDriverManager().install())
 
 # تهيئة المتصفح
-driver = webdriver.Edge(service=service, options=edge_options)
+driver = webdriver.Firefox(service=service, options=firefox_options)
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
@@ -164,45 +164,9 @@ def ensure_follow_button_ready():
         print(f"لم يتم العثور على الزر: {e}")
         return None
 
-def click_follow_button_until_stopped():
-    """الضغط على زر Follow بشكل متواصل حتى يتم إيقاف السكربت."""
-    try:
-        while True:
-            wait_for_page_to_load()
-            
-            # البحث عن زر Follow
-            follow_button = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
-            )
-
-            # حفظ لقطة الشاشة للزر
-            save_click_location_screenshot(follow_button, "follow_button_found")
-
-            # تمرير إلى الزر للتأكد من ظهوره
-            driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
-            human_like_delay(0.5, 1)  # تأخير بسيط
-
-            # الضغط على الزر
-            driver.execute_script("arguments[0].click();", follow_button)
-            print("تم الضغط على زر 'Follow'.")
-            human_like_delay(1, 2)  # تأخير بين الضغطة والأخرى
-
-            # التحقق من حالة الزر (إذا أصبح "Following")
-            try:
-                WebDriverWait(driver, 5).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
-                )
-                print("تم تغيير الزر إلى 'Following'.")
-            except:
-                print("الزر لا يزال 'Follow'، سيتم الضغط مرة أخرى.")
-    except KeyboardInterrupt:
-        print("تم إيقاف الضغط يدويًا.")
-    except Exception as e:
-        print(f"حدث خطأ أثناء الضغط المتواصل: {e}")
-
 
 def click_follow_button_with_delay():
-    """البحث عن زر Follow والضغط عليه بعد تأخير."""    
+    """البحث عن زر Follow والضغط عليه بعد تأخير."""
     try:
         # انتظار تحميل الصفحة بالكامل
         wait_for_page_to_load()
@@ -225,23 +189,63 @@ def click_follow_button_with_delay():
 
         print("تم الضغط على زر 'Follow' بعد تأخير.")
 
-        # إضافة تأخير عشوائي بعد الضغط
-        human_like_delay(1, 2)
-
+        # انتظار تغيير الزر إلى "Following"
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+        )
+        print("تم تغيير الزر إلى 'Following' بنجاح.")
+    
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_error_follow_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
 
+is_following = driver.execute_script("""
+    const button = document.querySelector("div.people-hash-FAB.Following .button-wrapper");
+    return button !== null;
+""")
 
-# تحميل الحسابات من ملف
+if is_following:
+    print("تم المتابعة بنجاح.")
+else:
+    print("لم يتم تأكيد المتابعة.")
+
+def open_url_from_file(file_path):
+    """فتح الرابط الموجود في ملف."""
+    try:
+        with open(file_path, "r") as file:
+            url = file.readline().strip()
+            if url:
+                driver.get(url)
+                print(f"تم فتح الرابط: {url}")
+                
+                # انتظار تحميل الصفحة بالكامل قبل الضغط على الزر
+                click_follow_button_with_delay()
+            else:
+                print("الرابط غير موجود في الملف.")
+    except Exception as e:
+        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
+
+def take_screenshot_after_delay():
+    """أخذ لقطة شاشة بعد تسجيل الدخول."""
+    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+
+# تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
 
-# تسجيل الدخول لجميع الحسابات
+# تسجيل الدخول إلى كل حساب
 for account in accounts:
     login(account)
-    time.sleep(2)  # الانتظار بين تسجيل الدخول لكل حساب
 
-# التفاعل مع زر Follow
-click_follow_button_with_delay()
+# فتح الرابط من الملف والضغط على زر Follow عدة مرات
+open_url_from_file("link.txt")
 
-# إغلاق المتصفح بعد الانتهاء
+# أخذ لقطة شاشة بعد تأخير
+take_screenshot_after_delay()
+
+# إغلاق المتصفح
 driver.quit()
