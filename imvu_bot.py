@@ -71,6 +71,7 @@ def load_accounts_from_file(file_path):
     return accounts
 
 def skip_cookies_if_present():
+    """تخطي نافذة الكوكيز إذا كانت موجودة."""
     try:
         cookie_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.accept-cookies"))
@@ -84,6 +85,7 @@ def skip_cookies_if_present():
         print("لم يتم العثور على زر الكوكيز، أو تم التعامل معه مسبقًا.")
 
 def click_sign_in_button():
+    """الضغط على زر تسجيل الدخول."""
     try:
         sign_in_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "ul.secondary-nav button.sign-in"))
@@ -105,7 +107,30 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-        
+
+def switch_to_popup_window():
+    """التبديل إلى نافذة منبثقة إذا كانت موجودة."""
+    try:
+        main_window = driver.current_window_handle
+        WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) > 1)
+
+        # التبديل إلى النافذة المنبثقة
+        for window_handle in driver.window_handles:
+            if window_handle != main_window:
+                driver.switch_to.window(window_handle)
+                print(f"تم التبديل إلى النافذة المنبثقة: {window_handle}")
+                break
+    except Exception as e:
+        print(f"خطأ أثناء التبديل إلى النافذة المنبثقة: {e}")
+
+def switch_back_to_main_window():
+    """الرجوع إلى النافذة الأصلية بعد التعامل مع النافذة المنبثقة."""
+    try:
+        driver.switch_to.window(driver.window_handles[0])
+        print("تم الرجوع إلى النافذة الرئيسية.")
+    except Exception as e:
+        print(f"خطأ أثناء الرجوع إلى النافذة الرئيسية: {e}")
+
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
@@ -147,10 +172,6 @@ def login(account):
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
-        
-        driver.get("https://www.imvu.com/next/av/L7AJ/")  # صفحة أخرى بعد الفشل
-        wait_for_page_to_load()
-        print("تم التوجه إلى الصفحة الجديدة.")
 
 def click_follow_button_with_delay():
     """البحث عن زر Follow والضغط عليه بعد تأخير."""
@@ -207,25 +228,26 @@ def open_url_from_file(file_path):
     except Exception as e:
         print(f"خطأ أثناء فتح الرابط من الملف: {e}")
 
-def take_screenshot_after_delay():
-    """أخذ لقطة شاشة بعد تسجيل الدخول."""
-    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
+def take_screenshot_and_save(step_name):
+    """أخذ لقطة شاشة وحفظها مع اسم الخطوة."""
+    global screenshot_counter
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_{step_name}.png"
     driver.save_screenshot(screenshot_path)
-    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+    print(f"تم حفظ لقطة الشاشة: {screenshot_path}")
+    screenshot_counter += 1
 
-# تحميل الحسابات من الملف
-accounts = load_accounts_from_file("accounts.txt")
+def main():
+    """الخطوات الرئيسية لتنفيذ عملية تسجيل الدخول والتفاعل مع الموقع."""
+    accounts = load_accounts_from_file("accounts.txt")
+    if accounts:
+        for account in accounts:
+            login(account)
+            open_url_from_file("url.txt")
+    else:
+        print("لا توجد حسابات للاستخدام.")
 
-# تسجيل الدخول إلى كل حساب
-for account in accounts:
-    login(account)
+# تشغيل البرنامج
+main()
 
-# فتح الرابط من الملف والضغط على زر Follow عدة مرات
-open_url_from_file("link.txt")
-
-# أخذ لقطة شاشة بعد تأخير
-take_screenshot_after_delay()
-
-# إغلاق المتصفح
+# إغلاق المتصفح بعد الانتهاء
 driver.quit()
