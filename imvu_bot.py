@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 import os
 import time
 import random
-
+ 
 # إعداد متصفح Edge
 edge_options = Options()
 edge_options.add_argument("--disable-extensions")
