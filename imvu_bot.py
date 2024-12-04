@@ -10,8 +10,6 @@ import os
 import time
 import random
 
-
-
 # إعداد متصفح Firefox
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
@@ -19,13 +17,14 @@ firefox_options.add_argument("--disable-gpu")
 firefox_options.add_argument("--no-sandbox")
 firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-firefox_options.set_preference("dom.webdriver.enabled", False)  # تعطيل كاشف الأتمتة
-firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")  # محاكاة متصفح حقيقي
+firefox_options.add_argument("--disable-blink-features=AutomationControlled")  # تعطيل كاشف الأتمتة
+firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/114.0")  # محاكاة متصفح حقيقي
+firefox_options.add_argument("--remote-debugging-port=9222")  # تعطيل اتصال DevTools
 firefox_options.headless = True  # تشغيل المتصفح بدون واجهة رسومية
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
-service = Service('/path/to/geckodriver')  
+
 # تهيئة المتصفح
 driver = webdriver.Firefox(service=service, options=firefox_options)
 
@@ -34,8 +33,6 @@ if not os.path.exists("screenshots"):
     os.makedirs("screenshots")
 
 screenshot_counter = 1  # عداد لقطات الشاشة
-
-# باقي الكود كما هو دون تغيير...
 
 def human_like_delay(min_delay=2, max_delay=5):
     """إضافة تأخير عشوائي لمحاكاة التصفح البشري."""
@@ -110,7 +107,7 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-
+        
 def login(account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
@@ -152,9 +149,25 @@ def login(account):
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
-        driver.get("https://www.imvu.com/next/av/L7AJ/")
+        
+        driver.get("https://www.imvu.com/next/av/L7AJ/")  # صفحة أخرى بعد الفشل
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
+
+def take_screenshot_after_delay():
+    """أخذ لقطة شاشة بعد 15 ثانية من تسجيل الدخول."""
+    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+
+def take_screenshot_after_delay_3_minutes():
+    """أخذ لقطة شاشة بعد 3 دقائق من فتح الصفحة الجديدة."""
+    human_like_delay(180, 180)  # تأخير لمدة 3 دقائق (180 ثانية)
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_page_open.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 3 دقائق وحفظها في: {screenshot_path}")
+
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -162,6 +175,7 @@ accounts = load_accounts_from_file("accounts.txt")
 # تسجيل الدخول لكل حساب
 for account in accounts:
     login(account)
-
+take_screenshot_after_delay()
+take_screenshot_after_delay_3_minutes() 
 # إغلاق المتصفح
 driver.quit()
