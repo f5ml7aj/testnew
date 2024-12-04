@@ -152,25 +152,26 @@ def login(account):
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
-def click_follow_button_multiple_times():
-    """البحث عن زر Follow والضغط عليه عدة مرات."""
+def click_follow_button_with_delay():
+    """البحث عن زر Follow والضغط عليه بعد تأخير."""
     try:
+        # انتظار تحميل الصفحة بالكامل
+        wait_for_page_to_load()
+
+        # إضافة تأخير عشوائي قبل الضغط على الزر
+        human_like_delay(2, 4)
+
         # العثور على الزر باستخدام الـ CSS selector
         follow_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
         save_click_location_screenshot(follow_button, "follow_button_found")
-        human_like_delay()
 
-        # استخدام ActionChains لتنفيذ الضغط المتعدد
+        # استخدام ActionChains لتنفيذ الضغط على الزر
         action = ActionChains(driver)
-        
-        # تحريك الماوس فوق الزر والضغط عليه عدة مرات (مثلاً 3 مرات)
-        for _ in range(3):
-            action.move_to_element(follow_button).click().perform()
-            human_like_delay(1, 2)  # إضافة تأخير عشوائي بين النقرات
+        action.move_to_element(follow_button).click().perform()
 
-        print("تم الضغط على زر 'Follow' عدة مرات.")
+        print("تم الضغط على زر 'Follow' بعد تأخير.")
 
         # الانتظار لتغيير الزر إلى "Following"
         WebDriverWait(driver, 10).until(
@@ -182,7 +183,7 @@ def click_follow_button_multiple_times():
         screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
         driver.save_screenshot(screenshot_path)
         print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
-        
+
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
 
@@ -193,16 +194,10 @@ def open_url_from_file(file_path):
             url = file.readline().strip()
             if url:
                 driver.get(url)
-                wait_for_page_to_load()
                 print(f"تم فتح الرابط: {url}")
                 
-                # أخذ لقطة شاشة بعد فتح الرابط
-                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
-                driver.save_screenshot(screenshot_path)
-                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
-                
-                # الضغط على زر Follow بعد فتح الصفحة
-                click_follow_button_multiple_times()
+                # انتظار تحميل الصفحة بالكامل قبل الضغط على الزر
+                click_follow_button_with_delay()
             else:
                 print("الرابط غير موجود في الملف.")
     except Exception as e:
