@@ -152,6 +152,19 @@ def login(account):
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
+def ensure_follow_button_ready():
+    try:
+        follow_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+        )
+        driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
+        print("الزر جاهز للاستخدام.")
+        return follow_button
+    except Exception as e:
+        print(f"لم يتم العثور على الزر: {e}")
+        return None
+
+
 def click_follow_button_with_delay():
     """البحث عن زر Follow والضغط عليه بعد تأخير."""
     try:
@@ -167,26 +180,23 @@ def click_follow_button_with_delay():
         )
         save_click_location_screenshot(follow_button, "follow_button_found")
 
-        # الضغط على الزر باستخدام ActionChains
-        action = ActionChains(driver)
-        action.move_to_element(follow_button).click().perform()
+        # التمرير إلى الزر للتأكد من ظهوره
+        driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
+        human_like_delay()
+
+        # الضغط على الزر باستخدام JavaScript إذا لم تعمل الطريقة العادية
+        driver.execute_script("arguments[0].click();", follow_button)
 
         print("تم الضغط على زر 'Follow' بعد تأخير.")
 
-        # الانتظار لتغيير الزر إلى "Following"
+        # انتظار تغيير الزر إلى "Following"
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
         )
         print("تم تغيير الزر إلى 'Following' بنجاح.")
 
-        # أخذ لقطة شاشة بعد الضغط على الزر وتغيير النص
-        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
-        driver.save_screenshot(screenshot_path)
-        print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
-
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-        # محاولة أخذ لقطة شاشة لتشخيص المشكلة
         screenshot_path = f"screenshots/{screenshot_counter:04d}_error_follow_button.png"
         driver.save_screenshot(screenshot_path)
         print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
