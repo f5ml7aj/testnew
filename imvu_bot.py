@@ -160,6 +160,11 @@ def open_url_from_file(file_path):
                 driver.get(url)
                 wait_for_page_to_load()
                 print(f"تم فتح الرابط: {url}")
+                
+                # أخذ لقطة شاشة بعد فتح الرابط
+                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
+                driver.save_screenshot(screenshot_path)
+                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
             else:
                 print("الرابط غير موجود في الملف.")
     except Exception as e:
