@@ -168,13 +168,20 @@ def click_follow_button():
         human_like_delay()
         print("تم الضغط على زر 'Follow'.")
 
-        # أخذ لقطة شاشة بعد الضغط على الزر
-        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_follow_button.png"
+        # الانتظار لتغيير الزر إلى "Following"
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+        )
+        print("تم تغيير الزر إلى 'Following' بنجاح.")
+
+        # أخذ لقطة شاشة بعد الضغط على الزر وتغيير النص
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
         driver.save_screenshot(screenshot_path)
-        print(f"تم أخذ لقطة شاشة بعد الضغط على زر 'Follow' وحفظها في: {screenshot_path}")
+        print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
         
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
+
         
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
