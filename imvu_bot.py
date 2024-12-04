@@ -152,64 +152,39 @@ def login(account):
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
-def ensure_follow_button_ready():
+def click_follow_button_multiple_times():
+    """البحث عن زر Follow والضغط عليه عدة مرات."""
     try:
+        # العثور على الزر باستخدام الـ CSS selector
         follow_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
-        driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
-        print("الزر جاهز للاستخدام.")
-        return follow_button
-    except Exception as e:
-        print(f"لم يتم العثور على الزر: {e}")
-        return None
-
-
-def click_follow_button_with_delay():
-    """البحث عن زر Follow والضغط عليه بعد تأخير."""
-    try:
-        # انتظار تحميل الصفحة بالكامل
-        wait_for_page_to_load()
-
-        # إضافة تأخير عشوائي قبل الضغط على الزر
-        human_like_delay(2, 4)
-
-        # العثور على الزر باستخدام الـ CSS selector المناسب
-        follow_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
-        )
         save_click_location_screenshot(follow_button, "follow_button_found")
-
-        # التمرير إلى الزر للتأكد من ظهوره
-        driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
         human_like_delay()
 
-        # الضغط على الزر باستخدام JavaScript إذا لم تعمل الطريقة العادية
-        driver.execute_script("arguments[0].click();", follow_button)
+        # استخدام ActionChains لتنفيذ الضغط المتعدد
+        action = ActionChains(driver)
+        
+        # تحريك الماوس فوق الزر والضغط عليه عدة مرات (مثلاً 3 مرات)
+        for _ in range(3):
+            action.move_to_element(follow_button).click().perform()
+            human_like_delay(1, 2)  # إضافة تأخير عشوائي بين النقرات
 
-        print("تم الضغط على زر 'Follow' بعد تأخير.")
+        print("تم الضغط على زر 'Follow' عدة مرات.")
 
-        # انتظار تغيير الزر إلى "Following"
+        # الانتظار لتغيير الزر إلى "Following"
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
         )
         print("تم تغيير الزر إلى 'Following' بنجاح.")
-    
+
+        # أخذ لقطة شاشة بعد الضغط على الزر وتغيير النص
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
+        
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-        screenshot_path = f"screenshots/{screenshot_counter:04d}_error_follow_button.png"
-        driver.save_screenshot(screenshot_path)
-        print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
-
-is_following = driver.execute_script("""
-    const button = document.querySelector("div.people-hash-FAB.Following .button-wrapper");
-    return button !== null;
-""")
-
-if is_following:
-    print("تم المتابعة بنجاح.")
-else:
-    print("لم يتم تأكيد المتابعة.")
 
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
@@ -218,10 +193,16 @@ def open_url_from_file(file_path):
             url = file.readline().strip()
             if url:
                 driver.get(url)
+                wait_for_page_to_load()
                 print(f"تم فتح الرابط: {url}")
                 
-                # انتظار تحميل الصفحة بالكامل قبل الضغط على الزر
-                click_follow_button_with_delay()
+                # أخذ لقطة شاشة بعد فتح الرابط
+                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
+                driver.save_screenshot(screenshot_path)
+                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
+                
+                # الضغط على زر Follow بعد فتح الصفحة
+                click_follow_button_multiple_times()
             else:
                 print("الرابط غير موجود في الملف.")
     except Exception as e:
