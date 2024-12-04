@@ -161,13 +161,13 @@ def click_follow_button_with_delay():
         # إضافة تأخير عشوائي قبل الضغط على الزر
         human_like_delay(2, 4)
 
-        # العثور على الزر باستخدام الـ CSS selector
+        # العثور على الزر باستخدام الـ CSS selector المناسب
         follow_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
         save_click_location_screenshot(follow_button, "follow_button_found")
 
-        # استخدام ActionChains لتنفيذ الضغط على الزر
+        # الضغط على الزر باستخدام ActionChains
         action = ActionChains(driver)
         action.move_to_element(follow_button).click().perform()
 
