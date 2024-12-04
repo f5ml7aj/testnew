@@ -164,6 +164,43 @@ def ensure_follow_button_ready():
         print(f"لم يتم العثور على الزر: {e}")
         return None
 
+def click_follow_button_until_stopped():
+    """الضغط على زر Follow بشكل متواصل حتى يتم إيقاف السكربت."""
+    try:
+        while True:
+            wait_for_page_to_load()
+            
+            # البحث عن زر Follow
+            follow_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+            )
+
+            # حفظ لقطة الشاشة للزر
+            save_click_location_screenshot(follow_button, "follow_button_found")
+
+            # تمرير إلى الزر للتأكد من ظهوره
+            driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
+            human_like_delay(0.5, 1)  # تأخير بسيط
+
+            # الضغط على الزر
+            driver.execute_script("arguments[0].click();", follow_button)
+            print("تم الضغط على زر 'Follow'.")
+            human_like_delay(1, 2)  # تأخير بين الضغطة والأخرى
+
+            # التحقق من حالة الزر (إذا أصبح "Following")
+            try:
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+                )
+                print("تم تغيير الزر إلى 'Following'.")
+            except:
+                print("الزر لا يزال 'Follow'، سيتم الضغط مرة أخرى.")
+    except KeyboardInterrupt:
+        print("تم إيقاف الضغط يدويًا.")
+    except Exception as e:
+        print(f"حدث خطأ أثناء الضغط المتواصل: {e}")
+
+
 
 def click_follow_button_with_delay():
     """البحث عن زر Follow والضغط عليه بعد تأخير."""
@@ -201,15 +238,7 @@ def click_follow_button_with_delay():
         driver.save_screenshot(screenshot_path)
         print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
 
-is_following = driver.execute_script("""
-    const button = document.querySelector("div.people-hash-FAB.Following .button-wrapper");
-    return button !== null;
-""")
 
-if is_following:
-    print("تم المتابعة بنجاح.")
-else:
-    print("لم يتم تأكيد المتابعة.")
 
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
@@ -246,6 +275,7 @@ open_url_from_file("link.txt")
 
 # أخذ لقطة شاشة بعد تأخير
 take_screenshot_after_delay()
-
+# استدعاء الدالة بعد تسجيل الدخول وفتح الرابط
+click_follow_button_until_stopped()
 # إغلاق المتصفح
 driver.quit()
