@@ -233,7 +233,7 @@ def main():
     if accounts:
         for account in accounts:
             login(account)
-            open_url_from_file("link.txt")
+            open_url_from_file("url.txt")
     else:
         print("لا توجد حسابات للاستخدام.")
 
