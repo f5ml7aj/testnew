@@ -163,7 +163,7 @@ def click_follow_button_with_delay():
 
         # العثور على الزر باستخدام الـ CSS selector
         follow_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
         save_click_location_screenshot(follow_button, "follow_button_found")
 
@@ -186,6 +186,10 @@ def click_follow_button_with_delay():
 
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
+        # محاولة أخذ لقطة شاشة لتشخيص المشكلة
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_error_follow_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
 
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
