@@ -182,21 +182,27 @@ def click_follow_button_with_delay():
         # إضافة تأخير عشوائي قبل الضغط على الزر
         human_like_delay(2, 4)
 
-        # العثور على الزر باستخدام الـ CSS selector
+        # العثور على الزر باستخدام XPath
         follow_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+            EC.element_to_be_clickable((By.XPATH, "//div[@class='people-hash-FAB Follow']//div[@class='button-wrapper']//div[@class='label label-m' and text()='Follow']"))
         )
+        print("تم العثور على زر Follow، الآن سيتم الضغط عليه.")
         save_click_location_screenshot(follow_button, "follow_button_found")
 
         # استخدام ActionChains لتنفيذ الضغط على الزر
         action = ActionChains(driver)
         action.move_to_element(follow_button).click().perform()
 
-        print("تم الضغط على زر 'Follow' بعد تأخير.")
+        # إضافة تأخير بعد الضغط للتحقق من النتيجة
+        human_like_delay(2, 4)
 
+        print("تم الضغط على زر 'Follow' بعد تأخير.")
+        
         # الانتظار لتغيير الزر إلى "Following"
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+            EC.text_to_be_present_in_element(
+                (By.XPATH, "//div[@class='people-hash-FAB Follow']//div[@class='label label-m']"), "Following"
+            )
         )
         print("تم تغيير الزر إلى 'Following' بنجاح.")
 
@@ -212,21 +218,6 @@ def click_follow_button_with_delay():
         driver.save_screenshot(screenshot_path)
         print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
 
-def open_url_from_file(file_path):
-    """فتح الرابط الموجود في ملف."""
-    try:
-        with open(file_path, "r") as file:
-            url = file.readline().strip()
-            if url:
-                driver.get(url)
-                print(f"تم فتح الرابط: {url}")
-                
-                # انتظار تحميل الصفحة بالكامل قبل الضغط على الزر
-                click_follow_button_with_delay()
-            else:
-                print("الرابط غير موجود في الملف.")
-    except Exception as e:
-        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
 
 def take_screenshot_and_save(step_name):
     """أخذ لقطة شاشة وحفظها مع اسم الخطوة."""
