@@ -185,7 +185,7 @@ def click_follow_button_multiple_times():
         
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-        
+
 def open_url_from_file(file_path):
     """فتح الرابط الموجود في ملف."""
     try:
@@ -202,12 +202,12 @@ def open_url_from_file(file_path):
                 print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
                 
                 # الضغط على زر Follow بعد فتح الصفحة
-                click_follow_button()
+                click_follow_button_multiple_times()
             else:
                 print("الرابط غير موجود في الملف.")
     except Exception as e:
         print(f"خطأ أثناء فتح الرابط من الملف: {e}")
-        
+
 def take_screenshot_after_delay():
     """أخذ لقطة شاشة بعد تسجيل الدخول."""
     human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
@@ -218,12 +218,15 @@ def take_screenshot_after_delay():
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
 
-# تسجيل الدخول لكل حساب
+# تسجيل الدخول إلى كل حساب
 for account in accounts:
     login(account)
-    # فتح الرابط من الملف بعد تسجيل الدخول
-    open_url_from_file("link.txt")  # قم بتحديد مسار الملف الذي يحتوي على الرابط
-    take_screenshot_after_delay()
+
+# فتح الرابط من الملف والضغط على زر Follow عدة مرات
+open_url_from_file("link.txt")
+
+# أخذ لقطة شاشة بعد تأخير
+take_screenshot_after_delay()
 
 # إغلاق المتصفح
 driver.quit()
