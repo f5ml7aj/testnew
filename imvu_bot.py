@@ -1,30 +1,30 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.edge.options import Options
+from selenium.webdriver.edge.service import Service
+from webdriver_manager.microsoft import EdgeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageDraw
 import os
 import time
 import random
 
-# إعداد متصفح Firefox
-firefox_options = Options()
-firefox_options.add_argument("--disable-extensions")
-firefox_options.add_argument("--disable-gpu")
-firefox_options.add_argument("--no-sandbox")
-firefox_options.add_argument("--disable-logging")
-firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
+# إعداد متصفح Edge
+edge_options = Options()
+edge_options.add_argument("--disable-extensions")
+edge_options.add_argument("--disable-gpu")
+edge_options.add_argument("--no-sandbox")
+edge_options.add_argument("--disable-logging")
+edge_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
+edge_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
-# إعداد خدمة Firefox
-service = Service(GeckoDriverManager().install())
+# إعداد خدمة Edge
+service = Service(EdgeDriverManager().install())
 
 # تهيئة المتصفح
-driver = webdriver.Firefox(service=service, options=firefox_options)
+driver = webdriver.Edge(service=service, options=edge_options)
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
@@ -201,9 +201,8 @@ def click_follow_button_until_stopped():
         print(f"حدث خطأ أثناء الضغط المتواصل: {e}")
 
 
-
 def click_follow_button_with_delay():
-    """البحث عن زر Follow والضغط عليه بعد تأخير."""
+    """البحث عن زر Follow والضغط عليه بعد تأخير."""    
     try:
         # انتظار تحميل الصفحة بالكامل
         wait_for_page_to_load()
@@ -226,56 +225,23 @@ def click_follow_button_with_delay():
 
         print("تم الضغط على زر 'Follow' بعد تأخير.")
 
-        # انتظار تغيير الزر إلى "Following"
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
-        )
-        print("تم تغيير الزر إلى 'Following' بنجاح.")
-    
+        # إضافة تأخير عشوائي بعد الضغط
+        human_like_delay(1, 2)
+
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-        screenshot_path = f"screenshots/{screenshot_counter:04d}_error_follow_button.png"
-        driver.save_screenshot(screenshot_path)
-        print(f"تم أخذ لقطة شاشة لتشخيص الخطأ وحفظها في: {screenshot_path}")
 
 
-
-def open_url_from_file(file_path):
-    """فتح الرابط الموجود في ملف."""
-    try:
-        with open(file_path, "r") as file:
-            url = file.readline().strip()
-            if url:
-                driver.get(url)
-                print(f"تم فتح الرابط: {url}")
-                
-                # انتظار تحميل الصفحة بالكامل قبل الضغط على الزر
-                click_follow_button_with_delay()
-            else:
-                print("الرابط غير موجود في الملف.")
-    except Exception as e:
-        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
-
-def take_screenshot_after_delay():
-    """أخذ لقطة شاشة بعد تسجيل الدخول."""
-    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
-
-# تحميل الحسابات من الملف
+# تحميل الحسابات من ملف
 accounts = load_accounts_from_file("accounts.txt")
 
-# تسجيل الدخول إلى كل حساب
+# تسجيل الدخول لجميع الحسابات
 for account in accounts:
     login(account)
+    time.sleep(2)  # الانتظار بين تسجيل الدخول لكل حساب
 
-# فتح الرابط من الملف والضغط على زر Follow عدة مرات
-open_url_from_file("link.txt")
+# التفاعل مع زر Follow
+click_follow_button_with_delay()
 
-# أخذ لقطة شاشة بعد تأخير
-take_screenshot_after_delay()
-# استدعاء الدالة بعد تسجيل الدخول وفتح الرابط
-click_follow_button_until_stopped()
-# إغلاق المتصفح
+# إغلاق المتصفح بعد الانتهاء
 driver.quit()
