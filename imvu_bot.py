@@ -157,7 +157,7 @@ def click_follow_button():
     try:
         # العثور على الزر باستخدام الـ CSS selector
         follow_button = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
         save_click_location_screenshot(follow_button, "follow_button_found")
         human_like_delay()
