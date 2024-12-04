@@ -163,6 +163,12 @@ def click_follow_button():
         follow_button.click()
         human_like_delay()
         print("تم الضغط على زر 'Follow'.")
+
+        # أخذ لقطة شاشة بعد الضغط على الزر
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_follow_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة بعد الضغط على زر 'Follow' وحفظها في: {screenshot_path}")
+        
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
 
