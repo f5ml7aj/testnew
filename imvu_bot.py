@@ -11,22 +11,28 @@ import time
 import random
 
 # إعداد متصفح Firefox
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
+
+# إعداد متصفح Firefox
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
 firefox_options.add_argument("--disable-gpu")
 firefox_options.add_argument("--no-sandbox")
 firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-firefox_options.add_argument("--disable-blink-features=AutomationControlled")  # تعطيل كاشف الأتمتة
-firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/114.0")  # محاكاة متصفح حقيقي
-firefox_options.add_argument("--remote-debugging-port=9222")  # تعطيل اتصال DevTools
-firefox_options.headless = True  # تشغيل المتصفح بدون واجهة رسومية
+firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
 
 # تهيئة المتصفح
 driver = webdriver.Firefox(service=service, options=firefox_options)
+
+# باقي الكود يبقى كما هو
+
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
