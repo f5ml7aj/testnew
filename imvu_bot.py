@@ -152,6 +152,37 @@ def login(account):
         wait_for_page_to_load()
         print("تم التوجه إلى الصفحة الجديدة.")
 
+
+
+def open_url_from_file(file_path):
+    """فتح الرابط الموجود في ملف."""
+    try:
+        with open(file_path, "r") as file:
+            url = file.readline().strip()
+            if url:
+                driver.get(url)
+                wait_for_page_to_load()
+                print(f"تم فتح الرابط: {url}")
+                
+                # أخذ لقطة شاشة بعد فتح الرابط
+                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
+                driver.save_screenshot(screenshot_path)
+                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
+                
+                # الضغط على زر Follow بعد فتح الصفحة
+                click_follow_button_multiple_times()
+            else:
+                print("الرابط غير موجود في الملف.")
+    except Exception as e:
+        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
+
+def take_screenshot_after_delay():
+    """أخذ لقطة شاشة بعد تسجيل الدخول."""
+    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+
 def click_follow_button_multiple_times():
     """البحث عن زر Follow والضغط عليه عدة مرات."""
     try:
@@ -185,36 +216,6 @@ def click_follow_button_multiple_times():
         
     except Exception as e:
         print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
-
-def open_url_from_file(file_path):
-    """فتح الرابط الموجود في ملف."""
-    try:
-        with open(file_path, "r") as file:
-            url = file.readline().strip()
-            if url:
-                driver.get(url)
-                wait_for_page_to_load()
-                print(f"تم فتح الرابط: {url}")
-                
-                # أخذ لقطة شاشة بعد فتح الرابط
-                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
-                driver.save_screenshot(screenshot_path)
-                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
-                
-                # الضغط على زر Follow بعد فتح الصفحة
-                click_follow_button_multiple_times()
-            else:
-                print("الرابط غير موجود في الملف.")
-    except Exception as e:
-        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
-
-def take_screenshot_after_delay():
-    """أخذ لقطة شاشة بعد تسجيل الدخول."""
-    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
-
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
 
