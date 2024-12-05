@@ -224,18 +224,39 @@ def click_follow_button_with_retry(max_retries=3):
 
     print("لم يتم العثور على الزر 'Follow' بعد عدة محاولات.")
 
-def switch_to_iframe_and_click_follow():
-    """التبديل إلى iframe إذا كان الزر موجودًا بداخله."""
+def click_follow_button_multiple_times():
+    """البحث عن زر Follow والضغط عليه عدة مرات."""
     try:
-        iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "iframe"))
+        # العثور على الزر باستخدام CSS selector
+        follow_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
-        driver.switch_to.frame(iframe)
-        print("تم التبديل إلى iframe.")
-        click_follow_button_with_retry()
-        driver.switch_to.default_content()  # الرجوع إلى الإطار الأساسي
+        save_click_location_screenshot(follow_button, "follow_button_found")
+        human_like_delay()
+
+        # استخدام ActionChains لتنفيذ الضغط المتعدد
+        action = ActionChains(driver)
+        
+        # تحريك الماوس فوق الزر والضغط عليه عدة مرات (مثلاً 3 مرات)
+        for _ in range(3):
+            action.move_to_element(follow_button).click().perform()
+            human_like_delay(1, 2)  # إضافة تأخير عشوائي بين النقرات
+
+        print("تم الضغط على زر 'Follow' عدة مرات.")
+
+        # الانتظار لتغيير الزر إلى "Following"
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+        )
+        print("تم تغيير الزر إلى 'Following' بنجاح.")
+
+        # أخذ لقطة شاشة بعد الضغط على الزر وتغيير النص
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
+        
     except Exception as e:
-        print(f"خطأ أثناء التبديل إلى iframe: {e}")
+        print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
