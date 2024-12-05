@@ -36,8 +36,32 @@ def human_like_delay(min_delay=2, max_delay=5):
     """إضافة تأخير عشوائي لمحاكاة التصفح البشري."""
     time.sleep(random.uniform(min_delay, max_delay))
 
+from selenium.webdriver.common.action_chains import ActionChains
+
+def move_mouse_to_element(element):
+    """محاكاة حركة الماوس بشكل تدريجي للوصول إلى العنصر."""
+    try:
+        # الحصول على موقع العنصر
+        location = element.location
+        size = element.size
+        
+        # حساب موقع منتصف العنصر
+        x = location['x'] + size['width'] / 2
+        y = location['y'] + size['height'] / 2
+        
+        # محاكاة حركة الماوس باستخدام ActionChains
+        actions = ActionChains(driver)
+        actions.move_by_offset(1, 1)  # بدء الحركة
+        actions.move_to_element_with_offset(element, 0, 0)  # الحركة التدريجية
+        actions.perform()
+        
+        print(f"تمت محاكاة حركة الماوس إلى العنصر عند الموقع ({x}, {y}).")
+    except Exception as e:
+        print(f"خطأ أثناء تحريك الماوس: {e}")
+
 def save_click_location_screenshot(element, step_name):
-    """حفظ لقطة شاشة مع تحديد مكان الضغط."""
+    """حفظ لقطة شاشة مع تحديد مكان الضغط، مع تحريك الماوس أولاً."""
+    move_mouse_to_element(element)  # تحريك الماوس إلى العنصر
     global screenshot_counter
     location = element.location
     size = element.size
@@ -55,7 +79,7 @@ def save_click_location_screenshot(element, step_name):
     draw.ellipse((x - radius, y - radius, x + radius, y + radius), outline="red", width=3)
     image.save(screenshot_path)
     screenshot_counter += 1
-    print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
+    print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}"
 
 def load_accounts_from_file(file_path):
     """تحميل الحسابات من ملف نصي."""
