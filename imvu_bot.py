@@ -234,15 +234,9 @@ def click_follow_button_multiple_times():
         save_click_location_screenshot(follow_button, "follow_button_found")
         human_like_delay()
 
-        # استخدام ActionChains لتنفيذ الضغط المتعدد
-        action = ActionChains(driver)
-        
-        # تحريك الماوس فوق الزر والضغط عليه عدة مرات (مثلاً 3 مرات)
-        for _ in range(3):
-            action.move_to_element(follow_button).click().perform()
-            human_like_delay(1, 2)  # إضافة تأخير عشوائي بين النقرات
-
-        print("تم الضغط على زر 'Follow' عدة مرات.")
+        # الضغط على الزر باستخدام JavaScript
+        driver.execute_script("arguments[0].click();", follow_button)
+        print("تم الضغط على زر 'Follow' باستخدام JavaScript.")
 
         # الانتظار لتغيير الزر إلى "Following"
         WebDriverWait(driver, 10).until(
@@ -250,7 +244,7 @@ def click_follow_button_multiple_times():
         )
         print("تم تغيير الزر إلى 'Following' بنجاح.")
 
-        # أخذ لقطة شاشة بعد الضغط على الزر وتغيير النص
+        # أخذ لقطة شاشة بعد تغيير الزر
         screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
         driver.save_screenshot(screenshot_path)
         print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
