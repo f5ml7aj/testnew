@@ -209,28 +209,45 @@ def take_screenshot_after_delay():
 
 def click_follow_button():
     try:
-        follow_button = WebDriverWait(driver, 10).until(
+        # انتظار ظهور زر "Follow" ليكون قابلًا للنقر
+        follow_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
-
-        # التأكد من رؤية الزر
-        driver.execute_script("arguments[0].scrollIntoView(true);", follow_button)
-
-        # تحريك الماوس إلى الزر
+        
+        # التمرير إلى الزر إذا كان خارج الإطار
+        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", follow_button)
+        
+        # محاكاة حركة الماوس التدريجية نحو الزر
         actions = ActionChains(driver)
         actions.move_to_element(follow_button).perform()
+        print("تم التمرير إلى زر 'Follow'.")
+        
+        # انتظار قليل لمحاكاة التفاعل البشري
+        human_like_delay(1, 2)
 
-        # النقر على الزر باستخدام ActionChains
-        actions.click(follow_button).perform()
-        time.sleep(2)
-
-        # تحقق من تغيير الزر إلى "Following"
+        # النقر على الزر
+        follow_button.click()
+        print("تم الضغط على زر 'Follow'.")
+        
+        # التحقق من تغيير حالة الزر إلى "Following"
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
         )
-        print("تم الضغط على زر 'Follow' وتغييره إلى 'Following'.")
+        print("تم تغيير الزر إلى 'Following'.")
+        
     except Exception as e:
         print(f"فشل الضغط على زر 'Follow': {e}")
+
+def click_follow_button_multiple_times(retries=5):
+    """الضغط على زر الفولو عدة مرات لضمان تسجيل العملية."""
+    for attempt in range(retries):
+        try:
+            print(f"محاولة رقم {attempt + 1} للضغط على زر 'Follow'.")
+            click_follow_button()
+            break  # إذا نجحت العملية، لا داعي لإعادة المحاولة
+        except Exception as e:
+            print(f"محاولة الضغط على زر 'Follow' فشلت: {e}. إعادة المحاولة...")
+            human_like_delay(2, 3)  # انتظار بين المحاولات
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
