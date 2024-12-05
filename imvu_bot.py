@@ -224,11 +224,6 @@ def click_follow_button_with_retry(max_retries=3):
 
     print("لم يتم العثور على الزر 'Follow' بعد عدة محاولات.")
 
----
-
-### **إضافة دعم الإطارات (iframes):**
-
-```python
 def switch_to_iframe_and_click_follow():
     """التبديل إلى iframe إذا كان الزر موجودًا بداخله."""
     try:
