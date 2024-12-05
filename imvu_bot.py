@@ -79,7 +79,7 @@ def save_click_location_screenshot(element, step_name):
     draw.ellipse((x - radius, y - radius, x + radius, y + radius), outline="red", width=3)
     image.save(screenshot_path)
     screenshot_counter += 1
-    print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}"
+    print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
 
 def load_accounts_from_file(file_path):
     """تحميل الحسابات من ملف نصي."""
