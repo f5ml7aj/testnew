@@ -146,12 +146,16 @@ def get_token_from_api(email, password):
 
 def login(account):
     """تسجيل الدخول باستخدام API أو Selenium."""
-    token = get_token_from_api(account["email"], account["password"])  # المحاولة الأولى مع API
+    # محاولة استخراج التوكن من API أولاً
+    token = get_token_from_api(account["email"], account["password"])  
     if token:
         print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
+        follow_with_token(token)  # استخدام التوكن لتنفيذ المتابعة مباشرة
         return token  # التوكن جاهز للاستخدام
     
     print("لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
+
+    # إذا لم نحصل على التوكن من الـ API، نتابع مع تسجيل الدخول عبر Selenium
     try:
         driver.get("https://pt.secure.imvu.com")
         wait_for_page_to_load()
@@ -199,7 +203,12 @@ def follow_with_token(token):
     """استخدام التوكن لتنفيذ المتابعة."""
     if token:
         print("محاولة تنفيذ المتابعة باستخدام التوكن...")
-        # تنفيذ الطلب مع التوكن هنا
+        # هنا يمكنك إضافة منطق المتابعة باستخدام التوكن
+        # على سبيل المثال:
+        # response = requests.post('URL_TO_FOLLOW', headers={'Authorization': f'Bearer {token}'})
+        # if response.status_code == 200:
+        #     print("تمت المتابعة بنجاح.")
+        pass
     else:
         print("التوكن غير موجود، لا يمكن متابعة الحساب.")
 
