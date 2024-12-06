@@ -21,17 +21,18 @@ firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
 firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
-for request in driver.requests:
-    if 'follow' in request.url:  # تحقق إذا كان الطلب له علاقة بعملية المتابعة
-        print(f"Request URL: {request.url}")
-        print(f"Response status: {request.response.status_code}")
-        print(f"Response body: {request.response.body.decode('utf-8')}")
-
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
 
 # تهيئة المتصفح
 driver = webdriver.Firefox(service=service, options=firefox_options)
+
+# إضافة تفاعل مع الطلبات عبر driver.requests
+for request in driver.requests:
+    if 'follow' in request.url:  # تحقق إذا كان الطلب له علاقة بعملية المتابعة
+        print(f"Request URL: {request.url}")
+        print(f"Response status: {request.response.status_code}")
+        print(f"Response body: {request.response.body.decode('utf-8')}")
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
@@ -132,6 +133,7 @@ def save_click_location_screenshot(element, step_name):
     image.save(screenshot_path)
     screenshot_counter += 1
     print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
+
 
 def load_accounts_from_file(file_path):
     """تحميل الحسابات من ملف نصي."""
