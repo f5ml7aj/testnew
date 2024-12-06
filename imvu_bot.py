@@ -247,6 +247,10 @@ def login(account):
 
 def follow_account_with_token(profile_id, token):
     """متابعة الحساب باستخدام التوكن."""
+    if not is_token_valid(token):
+        print("التوكن غير صالح. لا يمكن المتابعة.")
+        return
+    
     url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -273,33 +277,21 @@ follow_accounts = load_accounts_to_follow("follow_accounts.json")
 # تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
 accounts = load_accounts_from_file("accounts.txt")
 
-# دالة متابعة الحساب
-# دالة متابعة الحساب
-def follow_account(account, token):
-    """متابعة الحساب باستخدام التوكن المستخرج"""
-    follow_url = f"https://api.imvu.com/follow/{account['profile_id']}"
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-    response = requests.post(follow_url, headers=headers)
-    print(f"استجابة API: {response.status_code} - {response.text}")  # طباعة تفاصيل الاستجابة
-    if response.status_code == 200:
-        print(f"تم متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}")
-    else:
-        print(f"فشل متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}. سبب: {response.status_code} - {response.text}")
-
 for account in accounts:
     try:
         token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
         if token:
             print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
-# مثال لاستخدام الحسابات في عملية المتابعة
-        for account in follow_accounts:
-            print(f"متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}")
+            for account_to_follow in follow_accounts:
+                print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
+                follow_account_with_token(account_to_follow["profile_id"], token)
         else:
             print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
-            # إذا لم نحصل على التوكن من الـ API، نتابع مع تسجيل الدخول عبر Selenium
-            # قم بإضافة الكود الخاص بتسجيل الدخول عبر Selenium هنا.
+            token = login(account)
+            if token:
+                for account_to_follow in follow_accounts:
+                    print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
+                    follow_account_with_token(account_to_follow["profile_id"], token)
     except Exception as e:
         print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
 
