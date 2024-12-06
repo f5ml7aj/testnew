@@ -221,6 +221,8 @@ def login(account):
 
 
 # دالة المتابعة باستخدام التوكن
+
+
 def follow_account_with_token(profile_id, token):
     """متابعة الحساب باستخدام التوكن."""
     url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
@@ -241,17 +243,24 @@ def follow_account_with_token(profile_id, token):
     else:
         print(f"حدث خطأ: {response.status_code}, {response.text}")
 
+# تحميل الحسابات التي سيتم متابعتها من ملف
+follow_accounts = load_accounts_to_follow("follow_accounts.json")
 
-
-# تحميل الحسابات من الملف
+# تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
 accounts = load_accounts_from_file("accounts.txt")
 
 # تسجيل الدخول إلى كل حساب
 for account in accounts:
     try:
-        token = login(account)  # تسجيل الدخول باستخدام الحساب
+        token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
         if token:
-            follow_with_token(token)  # استخدام التوكن للمتابعة
+            print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
+            for follow_account in follow_accounts:
+                follow_account_with_token(follow_account['profile_id'], token)  # متابعة الحسابات
+        else:
+            print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
+            # إذا لم نحصل على التوكن من الـ API، نتابع مع تسجيل الدخول عبر Selenium
+            # قم بإضافة الكود الخاص بتسجيل الدخول عبر Selenium هنا.
     except Exception as e:
         print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
 
