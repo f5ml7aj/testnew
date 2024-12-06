@@ -261,46 +261,43 @@ def take_screenshot_after_delay():
 
 def click_follow_button():
     try:
-        # البحث عن زر "Follow" والتأكد من أنه قابل للنقر
-       follow_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
-        driver.execute_script("arguments[0].click();", follow_button)
+        # البحث عن زر "Follow" باستخدام محدد CSS
+        follow_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
         
-        # التمرير إلى الزر
+        # التمرير إلى الزر للتأكد من أنه في مجال العرض
         driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", follow_button)
         print("تم العثور على زر 'Follow'.")
 
-        # التأكد من أن الزر مرئي قبل النقر
+        # التأكد من أن الزر مرئي وقابل للنقر
         if not follow_button.is_displayed():
             print("زر 'Follow' غير مرئي.")
             return
-
-        # التأكد من أن الزر ليس محجوبًا
         if not follow_button.is_enabled():
             print("زر 'Follow' غير مفعل.")
             return
 
-        # النقر على الزر
-        follow_button.click()
+        # النقر على الزر باستخدام JavaScript للتأكد من تجاوزه أي مشاكل واجهة
+        driver.execute_script("arguments[0].click();", follow_button)
         print("تم الضغط على زر 'Follow'.")
 
-        # التحقق من نجاح العملية
+        # التحقق من نجاح العملية (ظهور زر "Following")
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
         )
         print("تم تغيير الزر إلى 'Following'.")
-
     except Exception as e:
         print(f"فشل الضغط على زر 'Follow': {e}")
 
 
 def verify_follow_status():
-    """تحقق إذا كان الزر قد تغير فعليًا إلى Following."""
+    """التحقق من أن الزر قد تغير إلى 'Following'."""
     try:
+        # البحث عن زر "Following"
         following_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper")
         if following_button.is_displayed():
             print("تم تأكيد المتابعة.")
         else:
-            print("الزر لم يتغير على الخادم.")
+            print("الزر لم يتغير إلى 'Following'.")
     except Exception as e:
         print(f"فشل التحقق من حالة الزر: {e}")
 
