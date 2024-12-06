@@ -118,12 +118,6 @@ def get_token_from_page():
         print(f"خطأ أثناء استخراج التوكن: {e}")
         return None
 
-import requests
-
-import requests
-
-import requests
-
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
@@ -170,23 +164,6 @@ def get_token_from_api(email, password):
         return None
 
 
-def get_token_from_id(login_id):
-    """استخدام الـ ID للحصول على التوكن."""
-    # بناءً على الـ ID الذي تم الحصول عليه، أرسل طلبًا آخر لاستخراج التوكن
-    token_url = f"https://api.imvu.com/{login_id}/token"  # مثال على الرابط الذي قد يحتوي على التوكن
-    response = requests.get(token_url)  # هنا يمكن أن يكون نوع الطلب GET حسب الحاجة
-    if response.status_code == 200:
-        data = response.json()
-        if "token" in data:
-            return data["token"]
-        else:
-            print("التوكن غير موجود بعد استخدام الـ ID.")
-            return None
-    else:
-        print(f"فشل في الحصول على التوكن من الـ ID. كود الحالة: {response.status_code}")
-        return None
-
-
 def login(account):
     """تسجيل الدخول باستخدام API أو Selenium."""
     # محاولة استخراج التوكن من API أولاً
@@ -223,33 +200,39 @@ def login(account):
 
         # الضغط على زر تسجيل الدخول
         login_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.submit"))
         )
-        save_click_location_screenshot(login_button, "login_clicked")
-        human_like_delay()
+        save_click_location_screenshot(login_button, "login_button_found")
         login_button.click()
-        wait_for_page_to_load()
+        human_like_delay()
 
-        print(f"تم تسجيل الدخول بنجاح باستخدام Selenium للحساب: {account['email']}")
-
-        # محاولة استخراج التوكن بعد تسجيل الدخول
+        # استخراج التوكن بعد تسجيل الدخول
         token = get_token_from_page()
-        if not token:
+        if token:
+            print(f"تم استخراج التوكن: {token}")
+            follow_with_token(token)  # استخدام التوكن مباشرة
+            return token
+        else:
             print("لم يتم العثور على التوكن بعد تسجيل الدخول.")
-        return token
+            return None
+    except Exception as e:
+        print(f"خطأ أثناء تسجيل الدخول عبر Selenium: {e}")
+        return None
+
+
+# دالة المتابعة باستخدام التوكن
+def follow_with_token(token):
+    """مثال على دالة المتابعة باستخدام التوكن."""
+    if token:
+        print(f"متابعة الحساب باستخدام التوكن: {token}")
+        # هنا يمكنك إضافة الكود لتنفيذ المهام مثل المتابعة باستخدام التوكن
+    else:
+        print("لم يتم العثور على التوكن.")
+
     
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام Selenium للحساب: {e}")
         return None
-
-def follow_with_token(token):
-    """استخدام التوكن لتنفيذ المتابعة."""
-    if token:
-        print("محاولة تنفيذ المتابعة باستخدام التوكن...")
-        # هنا يمكنك إضافة منطق المتابعة باستخدام التوكن
-        pass
-    else:
-        print("التوكن غير موجود، لا يمكن متابعة الحساب.")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
