@@ -121,17 +121,33 @@ def get_token_from_page():
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج التوكن."""
     url = "https://api.imvu.com/login"
-    payload = {"email": email, "password": password}
+    payload = {"username": email, "password": password, "gdpr_cookie_acceptance": False}
     headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+        "Content-Type": "application/json; charset=UTF-8",
+        "User-Agent": "<UA>",  # يمكنك وضع الـ User-Agent العشوائي هنا
+        "Host": "api.imvu.com",
+        "Connection": "keep-alive",
+        "Content-Length": "93",
+        "sec-ch-ua": "\"Google Chrome\";v=\"117\", \"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"117\"",
+        "Accept": "application/json; charset=utf-8",
+        "sec-ch-ua-mobile": "?0",
+        "X-imvu-application": "welcome/1",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "Origin": "https://pt.secure.imvu.com",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://pt.secure.imvu.com/",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7"
     }
+
     try:
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 200:
             data = response.json()
-            token = data.get("token")  # تحقق من المفتاح الصحيح للتوكن
-            if token:
+            if "token" in data:  # إذا كان هناك توكن في الرد
+                token = data["token"]
                 print(f"تم استخراج التوكن بنجاح: {token}")
                 return token
             else:
@@ -204,10 +220,6 @@ def follow_with_token(token):
     if token:
         print("محاولة تنفيذ المتابعة باستخدام التوكن...")
         # هنا يمكنك إضافة منطق المتابعة باستخدام التوكن
-        # على سبيل المثال:
-        # response = requests.post('URL_TO_FOLLOW', headers={'Authorization': f'Bearer {token}'})
-        # if response.status_code == 200:
-        #     print("تمت المتابعة بنجاح.")
         pass
     else:
         print("التوكن غير موجود، لا يمكن متابعة الحساب.")
