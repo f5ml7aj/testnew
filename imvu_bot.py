@@ -136,6 +136,10 @@ def get_token_from_page():
 
 import requests
 
+# باقي الكود
+import requests
+
+# دالة get_token_from_api يجب أن تكون هنا قبل استخدامها
 def get_tokens_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج جميع التوكنات الممكنة."""
     url = "https://api.imvu.com/login"
@@ -175,7 +179,6 @@ def get_tokens_from_api(email, password):
                 print(f"تم استخراج التوكن بنجاح: {token}")
                 
                 # في حالة وجود توكنات أخرى يمكنك التعامل مع قيم إضافية هنا إذا كان الرد يحتوي عليها
-                # على سبيل المثال، إذا كان هناك مصطلح آخر يحتوي على توكنات إضافية:
                 if "other_tokens" in data:  # مثال توكنات إضافية
                     for token in data["other_tokens"]:
                         tokens.append(token)
