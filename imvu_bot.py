@@ -229,10 +229,6 @@ def follow_with_token(token):
     else:
         print("لم يتم العثور على التوكن.")
 
-    
-    except Exception as e:
-        print(f"خطأ أثناء تسجيل الدخول باستخدام Selenium للحساب: {e}")
-        return None
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
