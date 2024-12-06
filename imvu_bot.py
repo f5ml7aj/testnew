@@ -221,13 +221,26 @@ def login(account):
 
 
 # دالة المتابعة باستخدام التوكن
-def follow_with_token(token):
-    """مثال على دالة المتابعة باستخدام التوكن."""
-    if token:
-        print(f"متابعة الحساب باستخدام التوكن: {token}")
-        # هنا يمكنك إضافة الكود لتنفيذ المهام مثل المتابعة باستخدام التوكن
+def follow_account_with_token(profile_id, token):
+    """متابعة الحساب باستخدام التوكن."""
+    url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-imvu-application": "next_desktop/1",
+        "X-imvu-sauce": "dDCGW-Dcpf1wuW5KIF0acH-v2WU="
+    }
+
+    response = requests.post(url, headers=headers)
+
+    if response.status_code == 201:
+        print(f"تمت المتابعة بنجاح: {profile_id}")
+    elif response.status_code == 204:
+        print("تمت المتابعة بنجاح ولكن لا يوجد محتوى مرفق.")
     else:
-        print("لم يتم العثور على التوكن.")
+        print(f"حدث خطأ: {response.status_code}, {response.text}")
+
 
 
 # تحميل الحسابات من الملف
