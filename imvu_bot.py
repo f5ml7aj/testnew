@@ -1,18 +1,16 @@
+from browsermobproxy import Server
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.common.action_chains import ActionChains
-from PIL import Image, ImageDraw
-import os
-import time
-import random
-import json
 
-# إعداد متصفح Firefox
+# إعداد BrowserMob Proxy
+server = Server("/path/to/browsermob-proxy")  # تأكد من مسار تثبيت BrowserMob Proxy
+server.start()
+proxy = server.create_proxy()
+
+# إعداد متصفح Firefox مع Proxy
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
 firefox_options.add_argument("--disable-gpu")
@@ -24,8 +22,21 @@ firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
 
-# تهيئة المتصفح
-driver = webdriver.Firefox(service=service, options=firefox_options)
+# تهيئة المتصفح مع ضبط البروكسي
+driver = webdriver.Firefox(service=service, options=firefox_options, proxy=proxy)
+
+# تشغيل البروكسي
+proxy.new_har("imvu_site")
+
+# فتح الموقع
+driver.get("https://pt.secure.imvu.com")
+# الآن يمكنك الحصول على طلبات HTTP:
+har_data = proxy.har  # بيانات الطلبات التي تمت أثناء جلسة التصفح
+for entry in har_data["log"]["entries"]:
+    request_url = entry["request"]["url"]
+    response_status = entry["response"]["status"]
+    print(f"Request URL: {request_url}")
+    print(f"Response Status: {response_status}")
 
 # إضافة تفاعل مع الطلبات عبر driver.requests
 for request in driver.requests:
