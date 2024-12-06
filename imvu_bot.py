@@ -71,6 +71,19 @@ def load_accounts_from_file(file_path):
     except Exception as e:
         print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
     return accounts
+import json
+
+def load_accounts_to_follow(file_path):
+    """تحميل الحسابات التي سيتم متابعتها من ملف JSON."""
+    accounts_to_follow = []
+    try:
+        with open(file_path, "r") as file:
+            data = json.load(file)  # تحميل البيانات من الملف بتنسيق JSON
+            accounts_to_follow = data.get("accounts_to_follow", [])  # الحصول على قائمة الحسابات
+        print(f"تم تحميل {len(accounts_to_follow)} حسابات من الملف.")
+    except Exception as e:
+        print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
+    return accounts_to_follow
 
 def skip_cookies_if_present():
     try:
@@ -245,7 +258,7 @@ def follow_account_with_token(profile_id, token):
         print(f"حدث خطأ: {response.status_code}, {response.text}")
 
 # تحميل الحسابات التي سيتم متابعتها من ملف
-follow_accounts = load_accounts_from_file("follow_accounts.txt")
+follow_accounts = load_accounts_to_follow("follow_accounts.json")
 
 # تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
 accounts = load_accounts_from_file("accounts.txt")
@@ -256,8 +269,9 @@ for account in accounts:
         token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
         if token:
             print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
-            for follow_account in follow_accounts:
-                follow_account_with_token(follow_account['profile_id'], token)  # متابعة الحسابات
+# مثال لاستخدام الحسابات في عملية المتابعة
+        for account in follow_accounts:
+            print(f"متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}")
         else:
             print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
             # إذا لم نحصل على التوكن من الـ API، نتابع مع تسجيل الدخول عبر Selenium
