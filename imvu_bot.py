@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw
 import os
 import time
 import random
+import requests
 
 # إعداد متصفح Firefox
 firefox_options = Options()
@@ -105,36 +106,22 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-        
-import requests  # الاستيرادات الأساسية
 
-def get_token_from_api(email, password):
-    """إرسال طلب API لتسجيل الدخول واستخراج التوكن."""
-    url = "https://api.imvu.com/login"
-    payload = {"email": email, "password": password}
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-    }
+def get_token_from_page():
+    """استخراج التوكن من الصفحة."""
     try:
-        response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            token = data.get("token")  # تحقق من المفتاح الصحيح للتوكن
-            if token:
-                print(f"تم استخراج التوكن بنجاح: {token}")
-                return token
-            else:
-                print("التوكن غير موجود في الرد.")
-                return None
+        # استخراج التوكن من العناصر المخفية أو JavaScript
+        token = driver.execute_script("return document.querySelector('input[name=\"csrf_token\"]').value;")
+        if token:
+            print(f"تم استخراج التوكن: {token}")
+            return token
         else:
-            print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
+            print("لم يتم العثور على التوكن في الصفحة.")
             return None
     except Exception as e:
-        print(f"حدث خطأ أثناء طلب التوكن: {e}")
+        print(f"خطأ أثناء استخراج التوكن: {e}")
         return None
 
-# الدالة التالية تعتمد على get_token_from_api
 def login(account):
     """تسجيل الدخول باستخدام API أو Selenium."""
     token = get_token_from_api(account["email"], account["password"])  # المحاولة الأولى مع API
@@ -175,100 +162,24 @@ def login(account):
         wait_for_page_to_load()
 
         print(f"تم تسجيل الدخول بنجاح باستخدام Selenium للحساب: {account['email']}")
+
+        # محاولة استخراج التوكن بعد تسجيل الدخول
+        token = get_token_from_page()
+        if not token:
+            print("لم يتم العثور على التوكن بعد تسجيل الدخول.")
+        return token
+    
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام Selenium للحساب: {e}")
-
-
-
-def open_url_from_file(file_path):
-    """فتح الرابط الموجود في ملف."""
-    try:
-        with open(file_path, "r") as file:
-            url = file.readline().strip()
-            if url:
-                driver.get(url)
-                wait_for_page_to_load()
-                print(f"تم فتح الرابط: {url}")
-                
-                # أخذ لقطة شاشة بعد فتح الرابط
-                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
-                driver.save_screenshot(screenshot_path)
-                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
-                
-                # الضغط على زر Follow بعد فتح الصفحة
-                click_follow_button_multiple_times()
-            else:
-                print("الرابط غير موجود في الملف.")
-    except Exception as e:
-        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
-
-def take_screenshot_after_delay():
-    """أخذ لقطة شاشة بعد تسجيل الدخول."""
-    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
-    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
-def get_token_from_page():
-    """استخراج التوكن من الصفحة."""
-    try:
-        # استخراج التوكن من العناصر المخفية أو JavaScript
-        token = driver.execute_script("return document.querySelector('input[name=\"csrf_token\"]').value;")
-        print(f"تم استخراج التوكن: {token}")
-        return token
-    except Exception as e:
-        print(f"خطأ أثناء استخراج التوكن: {e}")
         return None
 
-import requests
-def click_follow_button_multiple_times():
-    """الضغط على زر المتابعة عدة مرات."""
-    try:
-        follow_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.follow"))
-        )
-        for _ in range(3):  # الضغط 3 مرات كمثال
-            save_click_location_screenshot(follow_button, "follow_button_clicked")
-            follow_button.click()
-            human_like_delay(2, 4)
-        print("تم الضغط على زر المتابعة بنجاح.")
-    except Exception as e:
-        print(f"خطأ أثناء الضغط على زر المتابعة: {e}")
-
-def click_follow_button_with_token(token):
-    """إرسال طلب متابعة باستخدام التوكن."""
-    try:
-        # إعداد الهدرز
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-        }
-
-        # URL الخاص بزر المتابعة (يجب تحديثه بناءً على الموقع)
-        follow_url = "https://api.imvu.com/profile/profile-user-376547310/subscriptions/profile-user-352763477?limit=50"
-
-        # إعداد البيانات
-        payload = {"follow": True}
-
-        # إرسال الطلب
-        response = requests.post(follow_url, headers=headers, data=payload)
-        if response.status_code == 200:
-            print("تم إرسال طلب المتابعة بنجاح.")
-        else:
-            print(f"فشل في إرسال طلب المتابعة: {response.status_code}, {response.text}")
-    except Exception as e:
-        print(f"حدث خطأ أثناء إرسال طلب المتابعة: {e}")
-        
-def follow_with_token():
+def follow_with_token(token):
     """استخدام التوكن لتنفيذ المتابعة."""
-    token = get_token_from_page()
     if token:
-        click_follow_button_with_token(token)
+        print("محاولة تنفيذ المتابعة باستخدام التوكن...")
+        # تنفيذ الطلب مع التوكن هنا
     else:
         print("التوكن غير موجود، لا يمكن متابعة الحساب.")
-        
-
-# تحميل الحسابات من الملف
-accounts = load_accounts_from_file("accounts.txt")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -276,14 +187,10 @@ accounts = load_accounts_from_file("accounts.txt")
 # تسجيل الدخول إلى كل حساب
 for account in accounts:
     try:
-        login(account)  # تسجيل الدخول باستخدام الحساب
-        follow_with_token()  # محاولة استخدام التوكن للمتابعة
-        
-        # فتح الرابط من الملف والضغط على زر Follow
-        open_url_from_file("link.txt")
-        
-        # أخذ لقطة شاشة
-        take_screenshot_after_delay()
+        token = login(account)  # تسجيل الدخول باستخدام الحساب
+        if token:
+            follow_with_token(token)  # استخدام التوكن للمتابعة
     except Exception as e:
         print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
+
 driver.quit()
