@@ -177,12 +177,18 @@ def get_token_from_api(email, password):
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None
 
+# دالة للتأكد من صحة التوكن
+def is_token_valid(token):
+    """التحقق من صحة التوكن قبل محاولة استخدامه."""
+    # قم بإضافة منطق للتحقق من صلاحية التوكن إذا لزم الأمر
+    return token is not None and len(token) > 0
 
+# داخل الدالة login
 def login(account):
     """تسجيل الدخول باستخدام API أو Selenium."""
     # محاولة استخراج التوكن من API أولاً
     token = get_token_from_api(account["email"], account["password"])  
-    if token:
+    if is_token_valid(token):  # التحقق من صحة التوكن
         print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
         follow_with_token(token)  # استخدام التوكن لتنفيذ المتابعة مباشرة
         return token  # التوكن جاهز للاستخدام
