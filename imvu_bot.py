@@ -269,7 +269,20 @@ follow_accounts = load_accounts_to_follow("follow_accounts.json")
 # تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
 accounts = load_accounts_from_file("accounts.txt")
 
-# تسجيل الدخول إلى كل حساب
+# دالة متابعة الحساب
+def follow_account(account, token):
+    """متابعة الحساب باستخدام التوكن المستخرج"""
+    # استخدام التوكن للموافقة على الحساب
+    follow_url = f"https://api.imvu.com/follow/{account['profile_id']}"
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    response = requests.post(follow_url, headers=headers)
+    if response.status_code == 200:
+        print(f"تم متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}")
+    else:
+        print(f"فشل متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}. سبب: {response.status_code}")
+
 for account in accounts:
     try:
         token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
