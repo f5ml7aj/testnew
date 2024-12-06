@@ -21,6 +21,11 @@ firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
 firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
+for request in driver.requests:
+    if 'follow' in request.url:  # تحقق إذا كان الطلب له علاقة بعملية المتابعة
+        print(f"Request URL: {request.url}")
+        print(f"Response status: {request.response.status_code}")
+        print(f"Response body: {request.response.body.decode('utf-8')}")
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
@@ -290,17 +295,16 @@ def click_follow_button():
 
 
 def verify_follow_status():
-    """التحقق من أن زر Follow قد تم تفعيله."""
+    """تحقق إذا كان الزر قد تغير فعليًا إلى Following."""
     try:
-        following_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
-        )
-        if following_button:
-            print("تم التأكد من أن الحساب تم متابعته بنجاح.")
+        following_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper")
+        if following_button.is_displayed():
+            print("تم تأكيد المتابعة.")
         else:
-            print("لم يتم تفعيل المتابعة. قد يكون هناك مشكلة في العملية.")
+            print("الزر لم يتغير على الخادم.")
     except Exception as e:
-        print(f"فشل في التحقق من حالة المتابعة: {e}")
+        print(f"فشل التحقق من حالة الزر: {e}")
+
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
