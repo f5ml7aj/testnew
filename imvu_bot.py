@@ -241,8 +241,25 @@ def login(account):
         print(f"خطأ أثناء تسجيل الدخول عبر Selenium: {e}")
         return None
 
+def check_token_validity(token):
+    """التحقق من صحة التوكن."""
+    url = "https://api.imvu.com/userinfo"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json"
+    }
 
-# دالة المتابعة باستخدام التوكن
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        print("التوكن صالح!")
+        return True
+    elif response.status_code == 401:
+        print("التوكن غير صالح!")
+        return False
+    else:
+        print(f"فشل في التحقق من التوكن: {response.status_code} - {response.text}")
+        return False
 
 
 def follow_account_with_token(profile_id, token):
