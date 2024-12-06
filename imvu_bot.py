@@ -263,8 +263,7 @@ def click_follow_button():
     try:
         # البحث عن زر "Follow" والتأكد من أنه قابل للنقر
        follow_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
-        driver.execute_script("arguments[0].click();", follow_button))
-        )
+        driver.execute_script("arguments[0].click();", follow_button)
         
         # التمرير إلى الزر
         driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", follow_button)
