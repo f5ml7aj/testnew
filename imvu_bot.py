@@ -195,7 +195,6 @@ def get_tokens_from_api(email, password):
 # دالة للتأكد من صحة التوكن
 def is_token_valid(token):
     """التحقق من صحة التوكن قبل محاولة استخدامه."""
-    # قم بإضافة منطق للتحقق من صلاحية التوكن إذا لزم الأمر
     return token is not None and len(token) > 0
 
 # داخل الدالة login
