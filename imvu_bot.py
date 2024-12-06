@@ -20,6 +20,7 @@ firefox_options.add_argument("--no-sandbox")
 firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
 firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
+driver.switch_to.frame(iframe_element)
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
@@ -255,45 +256,51 @@ def take_screenshot_after_delay():
 
 def click_follow_button():
     try:
-        # انتظار ظهور زر "Follow" ليكون قابلًا للنقر
+        # البحث عن زر "Follow" والتأكد من أنه قابل للنقر
         follow_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
         )
         
-        # التمرير إلى الزر إذا كان خارج الإطار
+        # التمرير إلى الزر
         driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", follow_button)
-        
-        # محاكاة حركة الماوس التدريجية نحو الزر
-        actions = ActionChains(driver)
-        actions.move_to_element(follow_button).perform()
-        print("تم التمرير إلى زر 'Follow'.")
-        
-        # انتظار قليل لمحاكاة التفاعل البشري
-        human_like_delay(1, 2)
+        print("تم العثور على زر 'Follow'.")
+
+        # التأكد من أن الزر مرئي قبل النقر
+        if not follow_button.is_displayed():
+            print("زر 'Follow' غير مرئي.")
+            return
+
+        # التأكد من أن الزر ليس محجوبًا
+        if not follow_button.is_enabled():
+            print("زر 'Follow' غير مفعل.")
+            return
 
         # النقر على الزر
         follow_button.click()
         print("تم الضغط على زر 'Follow'.")
-        
-        # التحقق من تغيير حالة الزر إلى "Following"
+
+        # التحقق من نجاح العملية
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
         )
         print("تم تغيير الزر إلى 'Following'.")
-        
+
     except Exception as e:
         print(f"فشل الضغط على زر 'Follow': {e}")
 
-def click_follow_button_multiple_times(retries=5):
-    """الضغط على زر الفولو عدة مرات لضمان تسجيل العملية."""
-    for attempt in range(retries):
-        try:
-            print(f"محاولة رقم {attempt + 1} للضغط على زر 'Follow'.")
-            click_follow_button()
-            break  # إذا نجحت العملية، لا داعي لإعادة المحاولة
-        except Exception as e:
-            print(f"محاولة الضغط على زر 'Follow' فشلت: {e}. إعادة المحاولة...")
-            human_like_delay(2, 3)  # انتظار بين المحاولات
+
+def verify_follow_status():
+    """التحقق من أن زر Follow قد تم تفعيله."""
+    try:
+        following_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+        )
+        if following_button:
+            print("تم التأكد من أن الحساب تم متابعته بنجاح.")
+        else:
+            print("لم يتم تفعيل المتابعة. قد يكون هناك مشكلة في العملية.")
+    except Exception as e:
+        print(f"فشل في التحقق من حالة المتابعة: {e}")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
@@ -304,6 +311,8 @@ for account in accounts:
 
 # فتح الرابط من الملف والضغط على زر Follow عدة مرات
 open_url_from_file("link.txt")
+click_follow_button()
+verify_follow_status()
 
 # أخذ لقطة شاشة بعد تأخير
 take_screenshot_after_delay()
