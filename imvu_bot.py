@@ -106,16 +106,47 @@ def wait_for_page_to_load():
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
         
+import requests  # الاستيرادات الأساسية
+
+def get_token_from_api(email, password):
+    """إرسال طلب API لتسجيل الدخول واستخراج التوكن."""
+    url = "https://api.imvu.com/login"
+    payload = {"email": email, "password": password}
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    }
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            token = data.get("token")  # تحقق من المفتاح الصحيح للتوكن
+            if token:
+                print(f"تم استخراج التوكن بنجاح: {token}")
+                return token
+            else:
+                print("التوكن غير موجود في الرد.")
+                return None
+        else:
+            print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
+            return None
+    except Exception as e:
+        print(f"حدث خطأ أثناء طلب التوكن: {e}")
+        return None
+
+# الدالة التالية تعتمد على get_token_from_api
 def login(account):
-    """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
+    """تسجيل الدخول باستخدام API أو Selenium."""
+    token = get_token_from_api(account["email"], account["password"])  # المحاولة الأولى مع API
+    if token:
+        print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
+        return token  # التوكن جاهز للاستخدام
+    
+    print("لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
     try:
         driver.get("https://pt.secure.imvu.com")
         wait_for_page_to_load()
-
-        # تخطي نافذة الكوكيز
         skip_cookies_if_present()
-
-        # الضغط على زر تسجيل الدخول
         click_sign_in_button()
 
         # إدخال الإيميل
@@ -141,16 +172,11 @@ def login(account):
         save_click_location_screenshot(login_button, "login_clicked")
         human_like_delay()
         login_button.click()
-
         wait_for_page_to_load()
 
-        print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
+        print(f"تم تسجيل الدخول بنجاح باستخدام Selenium للحساب: {account['email']}")
     except Exception as e:
-        print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
-        
-        driver.get("https://www.imvu.com/next/av/L7AJ/")  # صفحة أخرى بعد الفشل
-        wait_for_page_to_load()
-        print("تم التوجه إلى الصفحة الجديدة.")
+        print(f"خطأ أثناء تسجيل الدخول باستخدام Selenium للحساب: {e}")
 
 
 
