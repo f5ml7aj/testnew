@@ -253,17 +253,19 @@ def follow_account_with_token(profile_id, token):
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-imvu-application": "next_desktop/1",
-        "X-imvu-sauce": "dDCGW-Dcpf1wuW5KIF0acH-v2WU="
+        "X-imvu-sauce": "dDCGW-Dcpf1wuW5KIF0acH-v2WU="  # تأكد من صحة هذه القيمة
     }
 
     response = requests.post(url, headers=headers)
 
+    print(f"استجابة API: {response.status_code} - {response.text}")  # طباعة تفاصيل الاستجابة
+    
     if response.status_code == 201:
         print(f"تمت المتابعة بنجاح: {profile_id}")
     elif response.status_code == 204:
-        print("تمت المتابعة بنجاح ولكن لا يوجد محتوى مرفق.")
+        print(f"تمت المتابعة بنجاح ولكن لا يوجد محتوى مرفق: {profile_id}")
     else:
-        print(f"حدث خطأ: {response.status_code}, {response.text}")
+        print(f"حدث خطأ أثناء محاولة المتابعة: {response.status_code} - {response.text}")
 
 # تحميل الحسابات التي سيتم متابعتها من ملف
 follow_accounts = load_accounts_to_follow("follow_accounts.json")
