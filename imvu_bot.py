@@ -245,7 +245,7 @@ def follow_account_with_token(profile_id, token):
         print(f"حدث خطأ: {response.status_code}, {response.text}")
 
 # تحميل الحسابات التي سيتم متابعتها من ملف
-follow_accounts = load_accounts_to_follow("follow_accounts.json")
+follow_accounts = load_accounts_from_file("follow_accounts.json")
 
 # تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
 accounts = load_accounts_from_file("accounts.txt")
