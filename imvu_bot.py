@@ -122,6 +122,8 @@ import requests
 
 import requests
 
+import requests
+
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
@@ -153,14 +155,10 @@ def get_token_from_api(email, password):
             if "id" in data:
                 login_id = data["id"]
                 print(f"تم استخراج الـ ID بنجاح: {login_id}")
-                # إرسال طلب آخر باستخدام الـ ID للحصول على التوكن
-                token = get_token_from_id(login_id)  # تابع مخصص للتعامل مع الـ ID
-                if token:
-                    print(f"تم استخراج التوكن بنجاح: {token}")
-                    return token
-                else:
-                    print("لم يتم استخراج التوكن بعد.")
-                    return None
+                # اعتبار الـ id كـ توكن هنا
+                token = login_id.split("/")[-1]  # استخراج التوكن كجزء من الـ ID
+                print(f"تم استخراج التوكن بنجاح: {token}")
+                return token
             else:
                 print("الـ ID غير موجود في الرد.")
                 return None
@@ -170,6 +168,7 @@ def get_token_from_api(email, password):
     except Exception as e:
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None
+
 
 def get_token_from_id(login_id):
     """استخدام الـ ID للحصول على التوكن."""
