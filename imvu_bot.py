@@ -134,8 +134,10 @@ def get_token_from_page():
         print(f"خطأ أثناء استخراج التوكن: {e}")
         return None
 
-def get_token_from_api(email, password):
-    """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
+import requests
+
+def get_tokens_from_api(email, password):
+    """إرسال طلب API لتسجيل الدخول واستخراج جميع التوكنات الممكنة."""
     url = "https://api.imvu.com/login"
     payload = {"username": email, "password": password, "gdpr_cookie_acceptance": False}
     headers = {
@@ -162,13 +164,24 @@ def get_token_from_api(email, password):
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 201:
             data = response.json()
+            tokens = []
+            
+            # تحقق من أن هناك توكنات متعددة أو معلومات أخرى
             if "id" in data:
                 login_id = data["id"]
                 print(f"تم استخراج الـ ID بنجاح: {login_id}")
-                # اعتبار الـ id كـ توكن هنا
                 token = login_id.split("/")[-1]  # استخراج التوكن كجزء من الـ ID
+                tokens.append(token)
                 print(f"تم استخراج التوكن بنجاح: {token}")
-                return token
+                
+                # في حالة وجود توكنات أخرى يمكنك التعامل مع قيم إضافية هنا إذا كان الرد يحتوي عليها
+                # على سبيل المثال، إذا كان هناك مصطلح آخر يحتوي على توكنات إضافية:
+                if "other_tokens" in data:  # مثال توكنات إضافية
+                    for token in data["other_tokens"]:
+                        tokens.append(token)
+                        print(f"تم استخراج توكن إضافي بنجاح: {token}")
+
+                return tokens  # إرجاع قائمة بكل التوكنات المستخرجة
             else:
                 print("الـ ID غير موجود في الرد.")
                 return None
