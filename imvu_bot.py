@@ -118,13 +118,15 @@ def get_token_from_page():
         print(f"خطأ أثناء استخراج التوكن: {e}")
         return None
 
+import requests
+
 def get_token_from_api(email, password):
-    """إرسال طلب API لتسجيل الدخول واستخراج التوكن."""
+    """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
     payload = {"username": email, "password": password, "gdpr_cookie_acceptance": False}
     headers = {
         "Content-Type": "application/json; charset=UTF-8",
-        "User-Agent": "<UA>",  # يمكنك وضع الـ User-Agent العشوائي هنا
+        "User-Agent": "<UA>",  # ضع الـ User-Agent العشوائي هنا
         "Host": "api.imvu.com",
         "Connection": "keep-alive",
         "Content-Length": "93",
@@ -146,12 +148,19 @@ def get_token_from_api(email, password):
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 200:
             data = response.json()
-            if "token" in data:  # إذا كان هناك توكن في الرد
-                token = data["token"]
-                print(f"تم استخراج التوكن بنجاح: {token}")
-                return token
+            if "id" in data:
+                login_id = data["id"]
+                print(f"تم استخراج الـ ID بنجاح: {login_id}")
+                # إرسال طلب آخر باستخدام الـ ID للحصول على التوكن
+                token = get_token_from_id(login_id)  # تابع مخصص للتعامل مع الـ ID
+                if token:
+                    print(f"تم استخراج التوكن بنجاح: {token}")
+                    return token
+                else:
+                    print("لم يتم استخراج التوكن بعد.")
+                    return None
             else:
-                print("التوكن غير موجود في الرد.")
+                print("الـ ID غير موجود في الرد.")
                 return None
         else:
             print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
@@ -159,6 +168,23 @@ def get_token_from_api(email, password):
     except Exception as e:
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None
+
+def get_token_from_id(login_id):
+    """استخدام الـ ID للحصول على التوكن."""
+    # بناءً على الـ ID الذي تم الحصول عليه، أرسل طلبًا آخر لاستخراج التوكن
+    token_url = f"https://api.imvu.com/{login_id}/token"  # مثال على الرابط الذي قد يحتوي على التوكن
+    response = requests.get(token_url)  # هنا يمكن أن يكون نوع الطلب GET حسب الحاجة
+    if response.status_code == 200:
+        data = response.json()
+        if "token" in data:
+            return data["token"]
+        else:
+            print("التوكن غير موجود بعد استخدام الـ ID.")
+            return None
+    else:
+        print(f"فشل في الحصول على التوكن من الـ ID. كود الحالة: {response.status_code}")
+        return None
+
 
 def login(account):
     """تسجيل الدخول باستخدام API أو Selenium."""
