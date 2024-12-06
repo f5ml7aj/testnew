@@ -134,14 +134,8 @@ def get_token_from_page():
         print(f"خطأ أثناء استخراج التوكن: {e}")
         return None
 
-import requests
-
-# باقي الكود
-import requests
-
-# دالة get_token_from_api يجب أن تكون هنا قبل استخدامها
-def get_tokens_from_api(email, password):
-    """إرسال طلب API لتسجيل الدخول واستخراج جميع التوكنات الممكنة."""
+def get_token_from_api(email, password):
+    """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
     payload = {"username": email, "password": password, "gdpr_cookie_acceptance": False}
     headers = {
@@ -168,23 +162,13 @@ def get_tokens_from_api(email, password):
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 201:
             data = response.json()
-            tokens = []
-            
-            # تحقق من أن هناك توكنات متعددة أو معلومات أخرى
             if "id" in data:
                 login_id = data["id"]
                 print(f"تم استخراج الـ ID بنجاح: {login_id}")
+                # اعتبار الـ id كـ توكن هنا
                 token = login_id.split("/")[-1]  # استخراج التوكن كجزء من الـ ID
-                tokens.append(token)
                 print(f"تم استخراج التوكن بنجاح: {token}")
-                
-                # في حالة وجود توكنات أخرى يمكنك التعامل مع قيم إضافية هنا إذا كان الرد يحتوي عليها
-                if "other_tokens" in data:  # مثال توكنات إضافية
-                    for token in data["other_tokens"]:
-                        tokens.append(token)
-                        print(f"تم استخراج توكن إضافي بنجاح: {token}")
-
-                return tokens  # إرجاع قائمة بكل التوكنات المستخرجة
+                return token
             else:
                 print("الـ ID غير موجود في الرد.")
                 return None
@@ -200,80 +184,60 @@ def is_token_valid(token):
     """التحقق من صحة التوكن قبل محاولة استخدامه."""
     return token is not None and len(token) > 0
 
-# داخل الدالة login
-import requests
+def login(account):
+    """تسجيل الدخول باستخدام API أو Selenium."""
+    # محاولة استخراج التوكن من API أولاً
+    token = get_token_from_api(account["email"], account["password"])  
+    if is_token_valid(token):  # التحقق من صحة التوكن
+        print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
+        follow_with_token(token)  # استخدام التوكن لتنفيذ المتابعة مباشرة
+        return token  # التوكن جاهز للاستخدام
+    
+    print("لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
 
-# استبدل هذا بمولد User-Agent عشوائي إذا لزم الأمر
-UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
-
-def login_and_get_token(user, password):
-    login_url = "https://api.imvu.com/login"
-    payload = {
-        "username": user,
-        "password": password,
-        "gdpr_cookie_acceptance": False
-    }
-    headers = {
-        "Content-Type": "application/json; charset=UTF-8",
-        "User-Agent": UA,
-        "Host": "api.imvu.com",
-        "Connection": "keep-alive",
-        "Content-Length": "93",
-        "sec-ch-ua": "\"Google Chrome\";v=\"117\", \"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"117\"",
-        "Accept": "application/json; charset=utf-8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7"
-    }
-
-    response = requests.post(login_url, json=payload, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        if "status" in data and data["status"] == "success":
-            print(f"Login successful for {user}")
-            cid = data.get("cid", "")
-            sid = response.cookies.get("osCsid")
-            sn = response.cookies.get("sncd")
-            nm = response.cookies.get("_imvu_avnm")
-            sess = response.cookies.get("browser_session")
-            sess2 = response.cookies.get("window_session")
-
-            return cid, sid, sn, nm, sess, sess2
-        else:
-            print(f"Login failed for {user}. Error: {data.get('error', 'Unknown error')}")
-    else:
-        print(f"Request failed. Status code: {response.status_code}")
-    return None, None, None, None, None, None
-
-# قراءة الحسابات من ملف
-def read_accounts(file_path):
-    accounts = []
+    # إذا لم نحصل على التوكن من الـ API، نتابع مع تسجيل الدخول عبر Selenium
     try:
-        with open(file_path, 'r') as file:
-            for line in file:
-                # افترض أن الحسابات تأتي بالشكل "username:password"
-                account = line.strip().split(":")
-                if len(account) == 2:
-                    accounts.append((account[0], account[1]))
-    except FileNotFoundError:
-        print(f"File {file_path} not found!")
-    return accounts
+        driver.get("https://pt.secure.imvu.com")
+        wait_for_page_to_load()
+        skip_cookies_if_present()
+        click_sign_in_button()
 
-# تنفيذ تسجيل الدخول وطلب المحفظة
-def get_wallet_data():
-    accounts = read_accounts("accounts.txt")  # تأكد من تحديث المسار إلى ملف الحسابات
-    for user, password in accounts:
-        cid, sid, sn, nm, sess, sess2 = login_and_get_token(user, password)
-        if cid:
-            wallet_url = f"https://api.imvu.com/wallet/wallet-{cid}"
-            wallet_response = requests.get(wallet_url, headers={
-                "Accept": "application/json; charset=utf-8",
-                "Cookie": f"osCsid={sid}; window_session={sess2}; sncd={sn}; _imvu_avnm={nm}",
-                "User-Agent": UA
-            })
-            print(f"Wallet data for {user}: {wallet_response.json()}")
+        # إدخال الإيميل
+        email_field = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.NAME, "avatarname"))
+        )
+        email_field.send_keys(account["email"])
+        save_click_location_screenshot(email_field, "email_entered")
+        human_like_delay()
 
-# استدعاء الوظيفة للحصول على بيانات المحفظة
-get_wallet_data()
+        # إدخال كلمة المرور
+        password_field = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.NAME, "password"))
+        )
+        password_field.send_keys(account["password"])
+        save_click_location_screenshot(password_field, "password_entered")
+        human_like_delay()
+
+        # الضغط على زر تسجيل الدخول
+        login_button = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.submit"))
+        )
+        save_click_location_screenshot(login_button, "login_button_found")
+        login_button.click()
+        human_like_delay()
+
+        # استخراج التوكن بعد تسجيل الدخول
+        token = get_token_from_page()
+        if token:
+            print(f"تم استخراج التوكن: {token}")
+            follow_with_token(token)  # استخدام التوكن مباشرة
+            return token
+        else:
+            print("لم يتم العثور على التوكن بعد تسجيل الدخول.")
+            return None
+    except Exception as e:
+        print(f"خطأ أثناء تسجيل الدخول عبر Selenium: {e}")
+        return None
 
 
 def check_token_validity(token):
