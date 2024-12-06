@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw
 import os
 import time
 import random
+import json
 
 # إعداد متصفح Firefox
 firefox_options = Options()
@@ -36,7 +37,52 @@ def human_like_delay(min_delay=2, max_delay=5):
     """إضافة تأخير عشوائي لمحاكاة التصفح البشري."""
     time.sleep(random.uniform(min_delay, max_delay))
 
-from selenium.webdriver.common.action_chains import ActionChains
+def extract_follow_button_details():
+    """جمع كافة المعلومات المتعلقة بأزرار 'Follow'."""
+    follow_buttons_data = {"selenium_info": []}
+    try:
+        # العثور على جميع أزرار Follow
+        follow_buttons = driver.find_elements(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
+        print(f"تم العثور على {len(follow_buttons)} أزرار 'Follow'.")
+
+        for button in follow_buttons:
+            try:
+                # جمع التفاصيل
+                details = {
+                    "text": button.text,
+                    "location": button.location,
+                    "size": button.size,
+                    "html": button.get_attribute("outerHTML")
+                }
+                follow_buttons_data["selenium_info"].append(details)
+                print(f"تم استخراج معلومات الزر: {details}")
+            except Exception as e:
+                print(f"خطأ أثناء استخراج معلومات الزر: {e}")
+        
+        # حفظ البيانات في ملف JSON
+        with open("follow_buttons_data.json", "w", encoding="utf-8") as file:
+            json.dump(follow_buttons_data, file, ensure_ascii=False, indent=4)
+        print("تم حفظ معلومات أزرار 'Follow' في ملف 'follow_buttons_data.json'.")
+    except Exception as e:
+        print(f"فشل استخراج معلومات أزرار 'Follow': {e}")
+    return follow_buttons_data
+
+def click_follow_button_multiple_times(retries=5):
+    """الضغط على زر الفولو عدة مرات وضمان تسجيل البيانات."""
+    for attempt in range(retries):
+        try:
+            print(f"محاولة رقم {attempt + 1} للضغط على زر 'Follow'.")
+            
+            # استخراج معلومات الزر
+            follow_buttons_data = extract_follow_button_details()
+            print(f"تفاصيل الأزرار المستخرجة: {follow_buttons_data}")
+            
+            click_follow_button()
+            break  # إذا نجحت العملية، لا داعي لإعادة المحاولة
+        except Exception as e:
+            print(f"محاولة الضغط على زر 'Follow' فشلت: {e}. إعادة المحاولة...")
+            human_like_delay(2, 3)  # انتظار بين المحاولات
+
 
 def move_mouse_to_element(element):
     """محاكاة حركة الماوس بشكل تدريجي للوصول إلى العنصر."""
