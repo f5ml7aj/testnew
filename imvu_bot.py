@@ -11,6 +11,7 @@ import os
 import time
 import random
 import requests
+import json
 
 # إعداد متصفح Firefox
 firefox_options = Options()
