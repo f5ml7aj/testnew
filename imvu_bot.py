@@ -107,19 +107,30 @@ def wait_for_page_to_load():
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
-def get_token_from_page():
-    """استخراج التوكن من الصفحة."""
+def get_token_from_api(email, password):
+    """إرسال طلب API لتسجيل الدخول واستخراج التوكن."""
+    url = "https://api.imvu.com/login"
+    payload = {"email": email, "password": password}
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    }
     try:
-        # استخراج التوكن من العناصر المخفية أو JavaScript
-        token = driver.execute_script("return document.querySelector('input[name=\"csrf_token\"]').value;")
-        if token:
-            print(f"تم استخراج التوكن: {token}")
-            return token
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            token = data.get("token")  # تحقق من المفتاح الصحيح للتوكن
+            if token:
+                print(f"تم استخراج التوكن بنجاح: {token}")
+                return token
+            else:
+                print("التوكن غير موجود في الرد.")
+                return None
         else:
-            print("لم يتم العثور على التوكن في الصفحة.")
+            print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
             return None
     except Exception as e:
-        print(f"خطأ أثناء استخراج التوكن: {e}")
+        print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None
 
 def login(account):
