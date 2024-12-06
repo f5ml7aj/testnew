@@ -107,6 +107,17 @@ def wait_for_page_to_load():
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
+def get_token_from_page():
+    """استخراج التوكن من الصفحة."""
+    try:
+        # استخراج التوكن من العناصر المخفية أو JavaScript
+        token = driver.execute_script("return document.querySelector('input[name=\"csrf_token\"]').value;")
+        print(f"تم استخراج التوكن: {token}")
+        return token
+    except Exception as e:
+        print(f"خطأ أثناء استخراج التوكن: {e}")
+        return None
+
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج التوكن."""
     url = "https://api.imvu.com/login"
