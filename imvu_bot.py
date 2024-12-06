@@ -257,8 +257,8 @@ def take_screenshot_after_delay():
 def click_follow_button():
     try:
         # البحث عن زر "Follow" والتأكد من أنه قابل للنقر
-        follow_button = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+       follow_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
+        driver.execute_script("arguments[0].click();", follow_button)
         )
         
         # التمرير إلى الزر
