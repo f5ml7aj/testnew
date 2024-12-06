@@ -1,16 +1,17 @@
-from browsermobproxy import Server
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.common.action_chains import ActionChains
+from PIL import Image, ImageDraw
+import os
+import time
+import random
 
-# إعداد BrowserMob Proxy
-server = Server("/path/to/browsermob-proxy")  # تأكد من مسار تثبيت BrowserMob Proxy
-server.start()
-proxy = server.create_proxy()
-
-# إعداد متصفح Firefox مع Proxy
+# إعداد متصفح Firefox
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
 firefox_options.add_argument("--disable-gpu")
@@ -22,28 +23,8 @@ firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
 
-# تهيئة المتصفح مع ضبط البروكسي
-driver = webdriver.Firefox(service=service, options=firefox_options, proxy=proxy)
-
-# تشغيل البروكسي
-proxy.new_har("imvu_site")
-
-# فتح الموقع
-driver.get("https://pt.secure.imvu.com")
-# الآن يمكنك الحصول على طلبات HTTP:
-har_data = proxy.har  # بيانات الطلبات التي تمت أثناء جلسة التصفح
-for entry in har_data["log"]["entries"]:
-    request_url = entry["request"]["url"]
-    response_status = entry["response"]["status"]
-    print(f"Request URL: {request_url}")
-    print(f"Response Status: {response_status}")
-
-# إضافة تفاعل مع الطلبات عبر driver.requests
-for request in driver.requests:
-    if 'follow' in request.url:  # تحقق إذا كان الطلب له علاقة بعملية المتابعة
-        print(f"Request URL: {request.url}")
-        print(f"Response status: {request.response.status_code}")
-        print(f"Response body: {request.response.body.decode('utf-8')}")
+# تهيئة المتصفح
+driver = webdriver.Firefox(service=service, options=firefox_options)
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
@@ -55,77 +36,8 @@ def human_like_delay(min_delay=2, max_delay=5):
     """إضافة تأخير عشوائي لمحاكاة التصفح البشري."""
     time.sleep(random.uniform(min_delay, max_delay))
 
-def extract_follow_button_details():
-    """جمع كافة المعلومات المتعلقة بأزرار 'Follow'."""
-    follow_buttons_data = {"selenium_info": []}
-    try:
-        # العثور على جميع أزرار Follow
-        follow_buttons = driver.find_elements(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
-        print(f"تم العثور على {len(follow_buttons)} أزرار 'Follow'.")
-
-        for button in follow_buttons:
-            try:
-                # جمع التفاصيل
-                details = {
-                    "text": button.text,
-                    "location": button.location,
-                    "size": button.size,
-                    "html": button.get_attribute("outerHTML")
-                }
-                follow_buttons_data["selenium_info"].append(details)
-                print(f"تم استخراج معلومات الزر: {details}")
-            except Exception as e:
-                print(f"خطأ أثناء استخراج معلومات الزر: {e}")
-        
-        # حفظ البيانات في ملف JSON
-        with open("follow_buttons_data.json", "w", encoding="utf-8") as file:
-            json.dump(follow_buttons_data, file, ensure_ascii=False, indent=4)
-        print("تم حفظ معلومات أزرار 'Follow' في ملف 'follow_buttons_data.json'.")
-    except Exception as e:
-        print(f"فشل استخراج معلومات أزرار 'Follow': {e}")
-    return follow_buttons_data
-
-def click_follow_button_multiple_times(retries=5):
-    """الضغط على زر الفولو عدة مرات وضمان تسجيل البيانات."""
-    for attempt in range(retries):
-        try:
-            print(f"محاولة رقم {attempt + 1} للضغط على زر 'Follow'.")
-            
-            # استخراج معلومات الزر
-            follow_buttons_data = extract_follow_button_details()
-            print(f"تفاصيل الأزرار المستخرجة: {follow_buttons_data}")
-            
-            click_follow_button()
-            break  # إذا نجحت العملية، لا داعي لإعادة المحاولة
-        except Exception as e:
-            print(f"محاولة الضغط على زر 'Follow' فشلت: {e}. إعادة المحاولة...")
-            human_like_delay(2, 3)  # انتظار بين المحاولات
-
-
-def move_mouse_to_element(element):
-    """محاكاة حركة الماوس بشكل تدريجي للوصول إلى العنصر."""
-    try:
-        # الحصول على موقع العنصر
-        location = element.location
-        size = element.size
-        
-        # حساب موقع منتصف العنصر
-        x = location['x'] + size['width'] / 2
-        y = location['y'] + size['height'] / 2
-        
-        # محاكاة حركة الماوس باستخدام ActionChains
-        actions = ActionChains(driver)
-        actions.move_by_offset(1, 1)  # بدء الحركة
-        actions.move_to_element_with_offset(element, 0, 0)  # الحركة التدريجية
-        actions.perform()
-        
-        print(f"تمت محاكاة حركة الماوس إلى العنصر عند الموقع ({x}, {y}).")
-    except Exception as e:
-        print(f"خطأ أثناء تحريك الماوس: {e}")
-
 def save_click_location_screenshot(element, step_name):
-    """حفظ لقطة شاشة مع تحديد مكان الضغط، مع تحريك الماوس أولاً."""
-    move_mouse_to_element(element)  # تحريك الماوس إلى العنصر
+    """حفظ لقطة شاشة مع تحديد مكان الضغط."""
     global screenshot_counter
     location = element.location
     size = element.size
@@ -144,7 +56,6 @@ def save_click_location_screenshot(element, step_name):
     image.save(screenshot_path)
     screenshot_counter += 1
     print(f"تم حفظ لقطة الشاشة مع تحديد الضغط: {screenshot_path}")
-
 
 def load_accounts_from_file(file_path):
     """تحميل الحسابات من ملف نصي."""
@@ -271,64 +182,82 @@ def take_screenshot_after_delay():
     screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
-
-def click_follow_button():
+def get_token_from_page():
+    """استخراج التوكن من الصفحة."""
     try:
-        # البحث عن زر "Follow" باستخدام محدد CSS
-        follow_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper")
-        
-        # التمرير إلى الزر للتأكد من أنه في مجال العرض
-        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", follow_button)
-        print("تم العثور على زر 'Follow'.")
+        # استخراج التوكن من العناصر المخفية أو JavaScript
+        token = driver.execute_script("return document.querySelector('input[name=\"csrf_token\"]').value;")
+        print(f"تم استخراج التوكن: {token}")
+        return token
+    except Exception as e:
+        print(f"خطأ أثناء استخراج التوكن: {e}")
+        return None
 
-        # التأكد من أن الزر مرئي وقابل للنقر
-        if not follow_button.is_displayed():
-            print("زر 'Follow' غير مرئي.")
-            return
-        if not follow_button.is_enabled():
-            print("زر 'Follow' غير مفعل.")
-            return
-
-        # النقر على الزر باستخدام JavaScript للتأكد من تجاوزه أي مشاكل واجهة
-        driver.execute_script("arguments[0].click();", follow_button)
-        print("تم الضغط على زر 'Follow'.")
-
-        # التحقق من نجاح العملية (ظهور زر "Following")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+import requests
+def click_follow_button_multiple_times():
+    """الضغط على زر المتابعة عدة مرات."""
+    try:
+        follow_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.follow"))
         )
-        print("تم تغيير الزر إلى 'Following'.")
+        for _ in range(3):  # الضغط 3 مرات كمثال
+            save_click_location_screenshot(follow_button, "follow_button_clicked")
+            follow_button.click()
+            human_like_delay(2, 4)
+        print("تم الضغط على زر المتابعة بنجاح.")
     except Exception as e:
-        print(f"فشل الضغط على زر 'Follow': {e}")
+        print(f"خطأ أثناء الضغط على زر المتابعة: {e}")
 
-
-def verify_follow_status():
-    """التحقق من أن الزر قد تغير إلى 'Following'."""
+def click_follow_button_with_token(token):
+    """إرسال طلب متابعة باستخدام التوكن."""
     try:
-        # البحث عن زر "Following"
-        following_button = driver.find_element(By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper")
-        if following_button.is_displayed():
-            print("تم تأكيد المتابعة.")
-        else:
-            print("الزر لم يتغير إلى 'Following'.")
-    except Exception as e:
-        print(f"فشل التحقق من حالة الزر: {e}")
+        # إعداد الهدرز
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+        }
 
+        # URL الخاص بزر المتابعة (يجب تحديثه بناءً على الموقع)
+        follow_url = "https://api.imvu.com/profile/profile-user-376547310/subscriptions/profile-user-352763477?limit=50"
+
+        # إعداد البيانات
+        payload = {"follow": True}
+
+        # إرسال الطلب
+        response = requests.post(follow_url, headers=headers, data=payload)
+        if response.status_code == 200:
+            print("تم إرسال طلب المتابعة بنجاح.")
+        else:
+            print(f"فشل في إرسال طلب المتابعة: {response.status_code}, {response.text}")
+    except Exception as e:
+        print(f"حدث خطأ أثناء إرسال طلب المتابعة: {e}")
+        
+def follow_with_token():
+    """استخدام التوكن لتنفيذ المتابعة."""
+    token = get_token_from_page()
+    if token:
+        click_follow_button_with_token(token)
+    else:
+        print("التوكن غير موجود، لا يمكن متابعة الحساب.")
+        
+
+# تحميل الحسابات من الملف
+accounts = load_accounts_from_file("accounts.txt")
 
 # تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
 
 # تسجيل الدخول إلى كل حساب
 for account in accounts:
-    login(account)
-
-# فتح الرابط من الملف والضغط على زر Follow عدة مرات
-open_url_from_file("link.txt")
-click_follow_button()
-verify_follow_status()
-
-# أخذ لقطة شاشة بعد تأخير
-take_screenshot_after_delay()
-
-# إغلاق المتصفح
+    try:
+        login(account)  # تسجيل الدخول باستخدام الحساب
+        follow_with_token()  # محاولة استخدام التوكن للمتابعة
+        
+        # فتح الرابط من الملف والضغط على زر Follow
+        open_url_from_file("link.txt")
+        
+        # أخذ لقطة شاشة
+        take_screenshot_after_delay()
+    except Exception as e:
+        print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
 driver.quit()
