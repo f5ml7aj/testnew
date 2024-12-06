@@ -120,6 +120,8 @@ def get_token_from_page():
 
 import requests
 
+import requests
+
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
@@ -146,7 +148,7 @@ def get_token_from_api(email, password):
 
     try:
         response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 200:
+        if response.status_code == 201:
             data = response.json()
             if "id" in data:
                 login_id = data["id"]
