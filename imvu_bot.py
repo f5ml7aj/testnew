@@ -73,6 +73,7 @@ def load_accounts_from_file(file_path):
     return accounts
 import json
 
+# الدالة لتحميل الحسابات التي سيتم متابعتها
 def load_accounts_to_follow(file_path):
     """تحميل الحسابات التي سيتم متابعتها من ملف JSON."""
     accounts_to_follow = []
@@ -84,6 +85,7 @@ def load_accounts_to_follow(file_path):
     except Exception as e:
         print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
     return accounts_to_follow
+
 
 def skip_cookies_if_present():
     try:
@@ -270,18 +272,19 @@ follow_accounts = load_accounts_to_follow("follow_accounts.json")
 accounts = load_accounts_from_file("accounts.txt")
 
 # دالة متابعة الحساب
+# دالة متابعة الحساب
 def follow_account(account, token):
     """متابعة الحساب باستخدام التوكن المستخرج"""
-    # استخدام التوكن للموافقة على الحساب
     follow_url = f"https://api.imvu.com/follow/{account['profile_id']}"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     response = requests.post(follow_url, headers=headers)
+    print(f"استجابة API: {response.status_code} - {response.text}")  # طباعة تفاصيل الاستجابة
     if response.status_code == 200:
         print(f"تم متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}")
     else:
-        print(f"فشل متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}. سبب: {response.status_code}")
+        print(f"فشل متابعة الحساب: {account['username']} - Profile ID: {account['profile_id']}. سبب: {response.status_code} - {response.text}")
 
 for account in accounts:
     try:
