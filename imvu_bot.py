@@ -162,15 +162,12 @@ def get_token_from_api(email, password):
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 201:
             data = response.json()
-            if "id" in data:
-                login_id = data["id"]
-                print(f"تم استخراج الـ ID بنجاح: {login_id}")
-                # اعتبار الـ id كـ توكن هنا
-                token = login_id.split("/")[-1]  # استخراج التوكن كجزء من الـ ID
+            if "sauce" in data["data"]:
+                token = data["data"]["sauce"]  # استخراج التوكن من الاستجابة
                 print(f"تم استخراج التوكن بنجاح: {token}")
                 return token
             else:
-                print("الـ ID غير موجود في الرد.")
+                print("التوكن غير موجود في الرد.")
                 return None
         else:
             print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
@@ -261,19 +258,19 @@ def check_token_validity(token):
         return False
 
 
-def follow_account_with_token(profile_id, token):
-    """متابعة الحساب باستخدام التوكن."""
-    if not is_token_valid(token):
+def follow_account_with_sauce(profile_id, sauce):
+    """متابعة الحساب باستخدام التوكن العشوائي 'sauce'."""
+    if not sauce:
         print("التوكن غير صالح. لا يمكن المتابعة.")
         return
     
     url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
     headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {sauce}",
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-imvu-application": "next_desktop/1",
-        "X-imvu-sauce": "dDCGW-Dcpf1wuW5KIF0acH-v2WU="  # تأكد من صحة هذه القيمة
+        "X-imvu-sauce": sauce  # التوكن العشوائي
     }
 
     response = requests.post(url, headers=headers)
