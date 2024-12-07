@@ -10,8 +10,6 @@ from PIL import Image, ImageDraw
 import os
 import time
 import random
-import requests
-import json
 
 # إعداد متصفح Firefox
 firefox_options = Options()
@@ -72,18 +70,6 @@ def load_accounts_from_file(file_path):
         print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
     return accounts
 
-def load_accounts_to_follow(file_path):
-    """تحميل الحسابات التي سيتم متابعتها من ملف JSON."""
-    accounts_to_follow = []
-    try:
-        with open(file_path, "r") as file:
-            data = json.load(file)  # تحميل البيانات من الملف بتنسيق JSON
-            accounts_to_follow = data.get("accounts_to_follow", [])  # الحصول على قائمة الحسابات
-        print(f"تم تحميل {len(accounts_to_follow)} حسابات من الملف.")
-    except Exception as e:
-        print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
-    return accounts_to_follow
-
 def skip_cookies_if_present():
     try:
         cookie_button = WebDriverWait(driver, 10).until(
@@ -119,81 +105,17 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-
-def get_x_imvu_sauce():
-    """استخراج قيمة X-imvu-sauce من الصفحة."""
-    try:
-        # استخدام JavaScript للحصول على قيمة X-imvu-sauce من ملف تعريف المستخدم
-        sauce_value = driver.execute_script('return window.localStorage.getItem("X-imvu-sauce");')
-        print(f"تم استخراج X-imvu-sauce: {sauce_value}")
-        return sauce_value
-    except Exception as e:
-        print(f"خطأ أثناء استخراج X-imvu-sauce: {e}")
-        return None
         
-def get_token_from_api(email, password):
-    """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
-    url = "https://api.imvu.com/login"
-    payload = {"username": email, "password": password, "gdpr_cookie_acceptance": False}
-    headers = {
-        "Content-Type": "application/json; charset=UTF-8",
-        "User-Agent": "<UA>",  # ضع الـ User-Agent العشوائي هنا
-        "Host": "api.imvu.com",
-        "Connection": "keep-alive",
-        "Content-Length": "93",
-        "sec-ch-ua": "\"Google Chrome\";v=\"117\", \"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"117\"",
-        "Accept": "application/json; charset=utf-8",
-        "sec-ch-ua-mobile": "?0",
-        "X-imvu-application": "welcome/1",
-        "sec-ch-ua-platform": "\"Windows\"",
-        "Origin": "https://pt.secure.imvu.com",
-        "Sec-Fetch-Site": "same-site",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Dest": "empty",
-        "Referer": "https://pt.secure.imvu.com/",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7"
-    }
-
-    try:
-        response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 201:
-            data = response.json()
-            if "sauce" in data["data"]:
-                token = data["data"]["sauce"]  # استخراج التوكن من الاستجابة
-                print(f"تم استخراج التوكن بنجاح: {token}")
-                return token
-            else:
-                print("التوكن غير موجود في الرد.")
-                return None
-        else:
-            print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
-            return None
-    except Exception as e:
-        print(f"حدث خطأ أثناء طلب التوكن: {e}")
-        return None
-
-# دالة للتأكد من صحة التوكن
-def is_token_valid(token):
-    """التحقق من صحة التوكن قبل محاولة استخدامه."""
-    return token is not None and len(token) > 0
-
 def login(account):
-    """تسجيل الدخول باستخدام API أو Selenium."""
-    # محاولة استخراج التوكن من API أولاً
-    token = get_token_from_api(account["email"], account["password"])  
-    if is_token_valid(token):  # التحقق من صحة التوكن
-        print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
-        follow_with_token(token)  # استخدام التوكن لتنفيذ المتابعة مباشرة
-        return token  # التوكن جاهز للاستخدام
-    
-    print("لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
-
-    # إذا لم نحصل على التوكن من الـ API، نتابع مع تسجيل الدخول عبر Selenium
+    """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         driver.get("https://pt.secure.imvu.com")
         wait_for_page_to_load()
+
+        # تخطي نافذة الكوكيز
         skip_cookies_if_present()
+
+        # الضغط على زر تسجيل الدخول
         click_sign_in_button()
 
         # إدخال الإيميل
@@ -214,48 +136,98 @@ def login(account):
 
         # الضغط على زر تسجيل الدخول
         login_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button.submit"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn.btn-primary"))
         )
-        save_click_location_screenshot(login_button, "login_button_found")
+        save_click_location_screenshot(login_button, "login_clicked")
+        human_like_delay()
         login_button.click()
+
+        wait_for_page_to_load()
+
+        print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
+    except Exception as e:
+        print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
+        
+        driver.get("https://www.imvu.com/next/av/L7AJ/")  # صفحة أخرى بعد الفشل
+        wait_for_page_to_load()
+        print("تم التوجه إلى الصفحة الجديدة.")
+
+
+
+def open_url_from_file(file_path):
+    """فتح الرابط الموجود في ملف."""
+    try:
+        with open(file_path, "r") as file:
+            url = file.readline().strip()
+            if url:
+                driver.get(url)
+                wait_for_page_to_load()
+                print(f"تم فتح الرابط: {url}")
+                
+                # أخذ لقطة شاشة بعد فتح الرابط
+                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
+                driver.save_screenshot(screenshot_path)
+                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
+                
+                # الضغط على زر Follow بعد فتح الصفحة
+                click_follow_button_multiple_times()
+            else:
+                print("الرابط غير موجود في الملف.")
+    except Exception as e:
+        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
+
+def take_screenshot_after_delay():
+    """أخذ لقطة شاشة بعد تسجيل الدخول."""
+    human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
+    screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
+    driver.save_screenshot(screenshot_path)
+    print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
+
+def click_follow_button_multiple_times():
+    """البحث عن زر Follow والضغط عليه عدة مرات."""
+    try:
+        # العثور على الزر باستخدام الـ CSS selector
+        follow_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+        )
+        save_click_location_screenshot(follow_button, "follow_button_found")
         human_like_delay()
 
-        # استخراج التوكن بعد تسجيل الدخول
-        token = get_token_from_page()
-        if token:
-            print(f"تم استخراج التوكن: {token}")
-            follow_with_token(token)  # استخدام التوكن مباشرة
-            return token
-        else:
-            print("لم يتم العثور على التوكن بعد تسجيل الدخول.")
-            return None
+        # استخدام ActionChains لتنفيذ الضغط المتعدد
+        action = ActionChains(driver)
+        
+        # تحريك الماوس فوق الزر والضغط عليه عدة مرات (مثلاً 3 مرات)
+        for _ in range(3):
+            action.move_to_element(follow_button).click().perform()
+            human_like_delay(1, 2)  # إضافة تأخير عشوائي بين النقرات
+
+        print("تم الضغط على زر 'Follow' عدة مرات.")
+
+        # الانتظار لتغيير الزر إلى "Following"
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+        )
+        print("تم تغيير الزر إلى 'Following' بنجاح.")
+
+        # أخذ لقطة شاشة بعد الضغط على الزر وتغيير النص
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
+        
     except Exception as e:
-        print(f"خطأ أثناء تسجيل الدخول عبر Selenium: {e}")
-        return None
-
-
-# تحميل الحسابات التي سيتم متابعتها من ملف
-follow_accounts = load_accounts_to_follow("follow_accounts.json")
-
-# تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
+        print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
+# تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
 
+# تسجيل الدخول إلى كل حساب
 for account in accounts:
-    try:
-        token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
-        if token:
-            print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
-            for account_to_follow in follow_accounts:
-                print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                follow_account_with_token(account_to_follow["profile_id"], token)
-        else:
-            print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...") 
-            token = login(account)
-            if token:
-                for account_to_follow in follow_accounts:
-                    print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                    follow_account_with_token(account_to_follow["profile_id"], token)
-    except Exception as e:
-        print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
+    login(account)
 
+# فتح الرابط من الملف والضغط على زر Follow عدة مرات
+open_url_from_file("link.txt")
+
+# أخذ لقطة شاشة بعد تأخير
+take_screenshot_after_delay()
+
+# إغلاق المتصفح
 driver.quit()
