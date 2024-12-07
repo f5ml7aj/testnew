@@ -180,7 +180,6 @@ def get_token_from_api(email, password):
         return None
 
 
-
 # دالة للتأكد من صحة التوكن
 def is_token_valid(token):
     """التحقق من صحة التوكن قبل محاولة استخدامه."""
@@ -294,6 +293,7 @@ follow_accounts = load_accounts_to_follow("follow_accounts.json")
 # تحميل الحسابات من الملف (المستخدمة لتسجيل الدخول)
 accounts = load_accounts_from_file("accounts.txt")
 
+# بدء عملية المتابعة
 for account in accounts:
     try:
         token = get_token_from_api(account["email"], account["password"])
@@ -304,11 +304,10 @@ for account in accounts:
                 follow_account_with_token(account_to_follow["profile_id"], token)  # استخدام الوظيفة الصحيحة هنا
         else:
             print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
-            token = login(account)
-            if token:
-                for account_to_follow in follow_accounts:
-                    print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                    follow_account_with_token(account_to_follow["profile_id"], token)  # استخدام الوظيفة الصحيحة هنا
+            # إذا فشل التوكن من الـ API، يمكن المحاولة مع Selenium.
+            # يتعين إضافة دالة تسجيل الدخول عبر Selenium في حال فشل استخدام API
     except Exception as e:
         print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
+
+# إنهاء المتصفح
 driver.quit()
