@@ -134,6 +134,8 @@ def get_x_imvu_sauce():
         print(f"خطأ أثناء استخراج X-imvu-sauce: {e}")
         return None
         
+import requests
+
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
@@ -159,11 +161,13 @@ def get_token_from_api(email, password):
     }
 
     try:
+        # إرسال الطلب
         response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 201:
+        
+        if response.status_code == 200:
             data = response.json()
-            if "sauce" in data["data"]:
-                token = data["data"]["sauce"]  # استخراج التوكن من الاستجابة
+            if "data" in data and "sauce" in data["data"]:
+                token = data["data"]["sauce"]  # استخراج التوكن من الرد
                 print(f"تم استخراج التوكن بنجاح: {token}")
                 return token
             else:
@@ -175,6 +179,7 @@ def get_token_from_api(email, password):
     except Exception as e:
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None
+
 
 # دالة للتأكد من صحة التوكن
 def is_token_valid(token):
