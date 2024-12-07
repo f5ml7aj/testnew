@@ -1,8 +1,5 @@
 {
     "accounts_to_follow": [
-        {
-            "username": "L7AJ",
-            "profile_id": "352763477"
-        }
+        {"username": "user1", "profile_id": "12345"},
     ]
 }
