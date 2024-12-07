@@ -248,39 +248,31 @@ def check_token_validity(token):
         "Accept": "application/json"
     }
 
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        print("التوكن صالح!")
-        return True
-    elif response.status_code == 401:
-        print("التوكن غير صالح!")
-        return False
-    else:
-        print(f"فشل في التحقق من التوكن: {response.status_code} - {response.text}")
-        return False
-
-def check_token_validity(token):
-    url = "https://api.imvu.com/userinfo"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/json"
-    }
-    
     try:
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            print("التوكن صالح ويمكن استخدامه.")
+            print("التوكن صالح!")
             return True
         elif response.status_code == 401:
             print("التوكن غير صالح!")
             return False
         else:
-            print(f"حدث خطأ أثناء التحقق من التوكن: {response.status_code} - {response.text}")
+            print(f"فشل في التحقق من التوكن: {response.status_code} - {response.text}")
             return False
     except Exception as e:
         print(f"خطأ أثناء التحقق من التوكن: {e}")
         return False
+
+# استخدام الدالة للتحقق من صلاحية التوكن قبل متابعة الحسابات
+token = "your_token_here"
+token_valid = check_token_validity(token)
+
+if not token_valid:
+    print("التوكن غير صالح. لن يتم متابعة الحسابات.")
+else:
+    print("التوكن صالح. متابعة الحسابات...")
+    # تابع هنا عملية متابعة الحسابات
+
 
 def follow_account_with_token(profile_id, token):
     """متابعة الحساب باستخدام التوكن."""
