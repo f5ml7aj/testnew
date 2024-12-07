@@ -260,6 +260,27 @@ def check_token_validity(token):
         print(f"فشل في التحقق من التوكن: {response.status_code} - {response.text}")
         return False
 
+def check_token_validity(token):
+    url = "https://api.imvu.com/userinfo"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            print("التوكن صالح ويمكن استخدامه.")
+            return True
+        elif response.status_code == 401:
+            print("التوكن غير صالح!")
+            return False
+        else:
+            print(f"حدث خطأ أثناء التحقق من التوكن: {response.status_code} - {response.text}")
+            return False
+    except Exception as e:
+        print(f"خطأ أثناء التحقق من التوكن: {e}")
+        return False
 
 def follow_account_with_token(profile_id, token):
     """متابعة الحساب باستخدام التوكن."""
