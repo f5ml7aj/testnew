@@ -75,7 +75,7 @@ def get_token_from_api(email, password):
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
     return None
 
-def login_with_selenium(account):
+def login_with_selenium_and_extract_data(account):
     try:
         driver.get("https://pt.secure.imvu.com")
         WebDriverWait(driver, 20).until(
@@ -102,21 +102,37 @@ def login_with_selenium(account):
         login_button.click()
         human_like_delay()
 
-        # استخراج التوكن
-        token = driver.execute_script('return window.localStorage.getItem("X-imvu-sauce");')
-        if token:
-            print(f"تم استخراج التوكن باستخدام Selenium: {token}")
-            return token
-    except Exception as e:
-        print(f"خطأ أثناء تسجيل الدخول باستخدام Selenium: {e}")
-    return None
+        # استخراج البيانات المطلوبة
+        local_data = {
+            "sauce": driver.execute_script('return window.localStorage.getItem("X-imvu-sauce");'),
+        }
 
-def follow_account_with_token(profile_id, token):
+        # استخراج الكوكيز المطلوبة
+        cookies_data = {cookie['name']: cookie['value'] for cookie in driver.get_cookies()}
+        required_cookies = ["sid", "window_session", "gid", "osCsid", "sncd"]
+        cookies_subset = {k: cookies_data.get(k, None) for k in required_cookies}
+
+        # دمج البيانات
+        session_data = {
+            "local_data": local_data,
+            "cookies": cookies_subset,
+        }
+
+        print(f"تم استخراج البيانات: {session_data}")
+        return session_data
+
+    except Exception as e:
+        print(f"خطأ أثناء تسجيل الدخول واستخراج البيانات باستخدام Selenium: {e}")
+        return None
+
+def follow_account_with_session_data(profile_id, session_data):
     url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
+    
     headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {session_data['local_data']['sauce']}",
         "Accept": "application/json",
         "Content-Type": "application/json",
+        "Cookie": "; ".join([f"{k}={v}" for k, v in session_data['cookies'].items() if v]),
     }
 
     response = requests.post(url, headers=headers)
@@ -132,15 +148,11 @@ follow_accounts = load_accounts_to_follow("follow_accounts.json")
 
 # بدء العملية
 for account in accounts:
-    token = get_token_from_api(account["email"], account["password"])
-    if not token:
-        print(f"فشل API. محاولة تسجيل الدخول باستخدام Selenium للحساب: {account['email']}")
-        token = login_with_selenium(account)
-
-    if token:
+    session_data = login_with_selenium_and_extract_data(account)
+    if session_data:
         for follow_account in follow_accounts:
-            follow_account_with_token(follow_account["profile_id"], token)
+            follow_account_with_session_data(follow_account["profile_id"], session_data)
     else:
-        print(f"فشل تسجيل الدخول للحساب: {account['email']}")
+        print(f"فشل تسجيل الدخول واستخراج البيانات للحساب: {account['email']}")
 
 driver.quit()
