@@ -123,19 +123,6 @@ def wait_for_page_to_load():
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
 
-def get_x_imvu_sauce():
-    """استخراج قيمة X-imvu-sauce من الصفحة."""
-    try:
-        # استخدام JavaScript للحصول على قيمة X-imvu-sauce من ملف تعريف المستخدم
-        sauce_value = driver.execute_script('return window.localStorage.getItem("X-imvu-sauce");')
-        print(f"تم استخراج X-imvu-sauce: {sauce_value}")
-        return sauce_value
-    except Exception as e:
-        print(f"خطأ أثناء استخراج X-imvu-sauce: {e}")
-        return None
-        
-import requests
-
 def get_token_from_api(email, password):
     """إرسال طلب API لتسجيل الدخول واستخراج الـ ID والتوكن."""
     url = "https://api.imvu.com/login"
@@ -261,7 +248,17 @@ def check_token_validity(token):
         print(f"فشل في التحقق من التوكن: {response.status_code} - {response.text}")
         return False
 
-
+def get_x_imvu_sauce():
+    """استخراج قيمة X-imvu-sauce من الصفحة."""
+    try:
+        # استخدام JavaScript للحصول على قيمة X-imvu-sauce من ملف تعريف المستخدم
+        sauce_value = driver.execute_script('return window.localStorage.getItem("X-imvu-sauce");')
+        print(f"تم استخراج X-imvu-sauce: {sauce_value}")
+        return sauce_value
+    except Exception as e:
+        print(f"خطأ أثناء استخراج X-imvu-sauce: {e}")
+        return None
+        
 def follow_account_with_token(profile_id, token):
     """متابعة الحساب باستخدام التوكن."""
     if not token:
@@ -273,7 +270,8 @@ def follow_account_with_token(profile_id, token):
         "Authorization": f"Bearer {token}",
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "X-imvu-application": "next_desktop/1"
+        "X-imvu-application": "next_desktop/1",
+        "X-imvu-sauce": "sauce"
     }
 
     response = requests.post(url, headers=headers)
