@@ -183,6 +183,42 @@ def take_screenshot_after_delay():
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
 
+def click_follow_button_with_realistic_interaction():
+    """البحث عن زر Follow والضغط عليه بمصداقية أكبر."""
+    try:
+        # العثور على الزر باستخدام الـ CSS selector
+        follow_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Follow .button-wrapper"))
+        )
+        
+        save_click_location_screenshot(follow_button, "follow_button_found")
+
+        # استخدام ActionChains لتحريك الماوس بشكل تدريجي نحو الزر
+        action = ActionChains(driver)
+        action.move_to_element(follow_button).perform()
+        human_like_delay(1, 2)  # إضافة تأخير عشوائي
+
+        # الضغط على الزر مع محاكاة الضغط الطبيعي
+        for _ in range(random.randint(1, 3)):  # عدد عشوائي من المحاولات
+            follow_button.click()
+            print("تم الضغط على زر 'Follow'.")
+            human_like_delay(1, 2)  # تأخير بين النقرات
+
+        # انتظار تغير الزر إلى "Following"
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-hash-FAB.Following .button-wrapper"))
+        )
+        print("تم تغيير الزر إلى 'Following' بنجاح.")
+
+        # أخذ لقطة شاشة بعد التفاعل
+        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_following_button.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"تم أخذ لقطة شاشة بعد تغيير الزر وحفظها في: {screenshot_path}")
+
+    except Exception as e:
+        print(f"حدث خطأ أثناء الضغط على زر 'Follow': {e}")
+
+
 def click_follow_button_multiple_times():
     """البحث عن زر Follow والضغط عليه عدة مرات."""
     try:
