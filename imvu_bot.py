@@ -263,24 +263,23 @@ def check_token_validity(token):
         return False
 
 
-def follow_account_with_sauce(profile_id, sauce):
-    """متابعة الحساب باستخدام التوكن العشوائي 'sauce'."""
-    if not sauce:
+def follow_account_with_token(profile_id, token):
+    """متابعة الحساب باستخدام التوكن."""
+    if not token:
         print("التوكن غير صالح. لا يمكن المتابعة.")
         return
     
     url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
     headers = {
-        "Authorization": f"Bearer {sauce}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "X-imvu-application": "next_desktop/1",
-        "X-imvu-sauce": sauce  # التوكن العشوائي
+        "X-imvu-application": "next_desktop/1"
     }
 
     response = requests.post(url, headers=headers)
 
-    print(f"استجابة API: {response.status_code} - {response.text}")  # طباعة تفاصيل الاستجابة
+    print(f"استجابة API: {response.status_code} - {response.text}")
     
     if response.status_code == 201:
         print(f"تمت المتابعة بنجاح: {profile_id}")
@@ -297,20 +296,19 @@ accounts = load_accounts_from_file("accounts.txt")
 
 for account in accounts:
     try:
-        token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
+        token = get_token_from_api(account["email"], account["password"])
         if token:
             print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
             for account_to_follow in follow_accounts:
                 print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                follow_account_with_token(account_to_follow["profile_id"], token)
+                follow_account_with_token(account_to_follow["profile_id"], token)  # استخدام الوظيفة الصحيحة هنا
         else:
             print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
             token = login(account)
             if token:
                 for account_to_follow in follow_accounts:
                     print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                    follow_account_with_token(account_to_follow["profile_id"], token)
+                    follow_account_with_token(account_to_follow["profile_id"], token)  # استخدام الوظيفة الصحيحة هنا
     except Exception as e:
         print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
-
 driver.quit()
