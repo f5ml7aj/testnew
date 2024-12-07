@@ -19,6 +19,7 @@ firefox_options.add_argument("--no-sandbox")
 firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
 firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
+firefox_options.headless = False
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
