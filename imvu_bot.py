@@ -161,13 +161,12 @@ def get_token_from_api(email, password):
     }
 
     try:
-        # إرسال الطلب
         response = requests.post(url, json=payload, headers=headers)
-        
-        if response.status_code == 200:
+        if response.status_code == 201:
             data = response.json()
-            if "data" in data and "sauce" in data["data"]:
-                token = data["data"]["sauce"]  # استخراج التوكن من الرد
+            if "denormalized" in data and len(data["denormalized"]) > 0:
+                # استخراج التوكن من البيانات
+                token = data["denormalized"][list(data["denormalized"].keys())[0]]["data"]["sauce"]
                 print(f"تم استخراج التوكن بنجاح: {token}")
                 return token
             else:
@@ -179,6 +178,7 @@ def get_token_from_api(email, password):
     except Exception as e:
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None
+
 
 
 # دالة للتأكد من صحة التوكن
