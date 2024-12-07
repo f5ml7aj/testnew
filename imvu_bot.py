@@ -293,7 +293,7 @@ def follow_account_with_token(profile_id, token, sauce):
         print("التوكن غير صالح. لا يمكن المتابعة.")
         return
     
-    url = f"https://api.imvu.com/profile/profile-user-{profile_id}/subscriptions?limit=50"
+    url = f"https://api.imvu.com/profile/profile-user-{profile_id}"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json",
