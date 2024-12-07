@@ -280,6 +280,12 @@ else:
     print("التوكن صالح. متابعة الحسابات...")
     # تابع هنا عملية متابعة الحسابات
 
+def follow_with_token(token):
+    """الدالة لمتابعة الحسابات باستخدام التوكن."""
+    for account_to_follow in follow_accounts:
+        profile_id = account_to_follow["profile_id"]
+        print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {profile_id}")
+        follow_account_with_token(profile_id, token, sauce)  # تمرير التوكن و X-imvu-sauce
 
 def follow_account_with_token(profile_id, token, sauce):
     """متابعة الحساب باستخدام التوكن و X-imvu-sauce."""
