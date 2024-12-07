@@ -166,11 +166,15 @@ def get_token_from_api(email, password):
                 login_id = data["id"]
                 print(f"تم استخراج الـ ID بنجاح: {login_id}")
                 # استخراج التوكن كجزء من الـ ID
-                token = login_id.split("/")[-1]  
-                # استخراج X-imvu-sauce من الـ response
+                token = login_id.split("/")[-1]
+                # استخراج X-imvu-sauce من الـ response headers
                 sauce = response.headers.get("X-imvu-sauce", "")
+                if sauce:
+                    print(f"تم استخراج X-imvu-sauce بنجاح: {sauce}")
+                else:
+                    print("X-imvu-sauce غير موجود في الرد.")
                 print(f"تم استخراج التوكن بنجاح: {token} و X-imvu-sauce: {sauce}")
-                return token, sauce  # إرجاع التوكن و X-imvu-sauce
+                return token, sauce
             else:
                 print("الـ ID غير موجود في الرد.")
                 return None, None
@@ -180,6 +184,7 @@ def get_token_from_api(email, password):
     except Exception as e:
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
         return None, None
+
 
 # دالة للتأكد من صحة التوكن
 def is_token_valid(token):
