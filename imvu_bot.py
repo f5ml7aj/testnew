@@ -165,19 +165,21 @@ def get_token_from_api(email, password):
             if "id" in data:
                 login_id = data["id"]
                 print(f"تم استخراج الـ ID بنجاح: {login_id}")
-                # اعتبار الـ id كـ توكن هنا
-                token = login_id.split("/")[-1]  # استخراج التوكن كجزء من الـ ID
-                print(f"تم استخراج التوكن بنجاح: {token}")
-                return token
+                # استخراج التوكن كجزء من الـ ID
+                token = login_id.split("/")[-1]  
+                # استخراج X-imvu-sauce من الـ response
+                sauce = response.headers.get("X-imvu-sauce", "")
+                print(f"تم استخراج التوكن بنجاح: {token} و X-imvu-sauce: {sauce}")
+                return token, sauce  # إرجاع التوكن و X-imvu-sauce
             else:
                 print("الـ ID غير موجود في الرد.")
-                return None
+                return None, None
         else:
             print(f"فشل تسجيل الدخول. كود الحالة: {response.status_code}, الرد: {response.text}")
-            return None
+            return None, None
     except Exception as e:
         print(f"حدث خطأ أثناء طلب التوكن: {e}")
-        return None
+        return None, None
 
 # دالة للتأكد من صحة التوكن
 def is_token_valid(token):
@@ -274,8 +276,8 @@ else:
     # تابع هنا عملية متابعة الحسابات
 
 
-def follow_account_with_token(profile_id, token):
-    """متابعة الحساب باستخدام التوكن."""
+def follow_account_with_token(profile_id, token, sauce):
+    """متابعة الحساب باستخدام التوكن و X-imvu-sauce."""
     if not is_token_valid(token):
         print("التوكن غير صالح. لا يمكن المتابعة.")
         return
@@ -286,11 +288,10 @@ def follow_account_with_token(profile_id, token):
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-imvu-application": "next_desktop/1",
-        "X-imvu-sauce": "dDCGW-Dcpf1wuW5KIF0acH-v2WU="  # تأكد من صحة هذه القيمة
+        "X-imvu-sauce": sauce  # استخدام X-imvu-sauce من المتغير
     }
 
     response = requests.post(url, headers=headers)
-
     print(f"استجابة API: {response.status_code} - {response.text}")  # طباعة تفاصيل الاستجابة
     
     if response.status_code == 201:
@@ -308,20 +309,19 @@ accounts = load_accounts_from_file("accounts.txt")
 
 for account in accounts:
     try:
-        token = get_token_from_api(account["email"], account["password"])  # استخراج التوكن باستخدام API
-        if token:
-            print(f"تم تسجيل الدخول باستخدام API. التوكن: {token}")
+        token, sauce = get_token_from_api(account["email"], account["password"])  # استخراج التوكن و X-imvu-sauce باستخدام API
+        if token and sauce:
+            print(f"تم تسجيل الدخول باستخدام API. التوكن: {token} و X-imvu-sauce: {sauce}")
             for account_to_follow in follow_accounts:
                 print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                follow_account_with_token(account_to_follow["profile_id"], token)
+                follow_account_with_token(account_to_follow["profile_id"], token, sauce)  # تمرير التوكن و X-imvu-sauce
         else:
             print(f"لم يتم استخراج التوكن من API. المحاولة باستخدام Selenium...")
             token = login(account)
             if token:
                 for account_to_follow in follow_accounts:
                     print(f"متابعة الحساب: {account_to_follow['username']} - Profile ID: {account_to_follow['profile_id']}")
-                    follow_account_with_token(account_to_follow["profile_id"], token)
+                    follow_account_with_token(account_to_follow["profile_id"], token, sauce)  # تمرير التوكن و X-imvu-sauce
     except Exception as e:
         print(f"حدث خطأ مع الحساب: {account['email']}, الخطأ: {e}")
-
-driver.quit() 
+driver.quit()
