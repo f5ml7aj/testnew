@@ -11,6 +11,7 @@ import os
 import time
 import random
 
+
 # إعداد متصفح Firefox
 firefox_options = Options()
 firefox_options.add_argument("--disable-extensions")
@@ -18,7 +19,9 @@ firefox_options.add_argument("--disable-gpu")
 firefox_options.add_argument("--no-sandbox")
 firefox_options.add_argument("--disable-logging")
 firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-firefox_options.add_argument("--headless")  
+firefox_options.add_argument("--headless")
+firefox_options.add_argument("--proxy-server=socks5://127.0.0.1:9050")  # استخدم بروكسي لتجنب الحظر
+firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 
 # إعداد خدمة Firefox
 service = Service(GeckoDriverManager().install())
@@ -69,6 +72,16 @@ def load_accounts_from_file(file_path):
     except Exception as e:
         print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
     return accounts
+def save_cookies():
+    cookies = driver.get_cookies()
+    with open("cookies.json", "w") as file:
+        json.dump(cookies, file)
+
+def load_cookies():
+    with open("cookies.json", "r") as file:
+        cookies = json.load(file)
+    for cookie in cookies:
+        driver.add_cookie(cookie)
 
 def skip_cookies_if_present():
     try:
