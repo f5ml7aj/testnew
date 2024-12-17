@@ -5,29 +5,26 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageDraw
 import os
 import time
 import random
 
-
 # إعداد متصفح Firefox
-firefox_options = Options()
-firefox_options.add_argument("--disable-extensions")
-firefox_options.add_argument("--disable-gpu")
-firefox_options.add_argument("--no-sandbox")
-firefox_options.add_argument("--disable-logging")
-firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
-firefox_options.add_argument("--headless")
-firefox_options.add_argument("--proxy-server=socks5://127.0.0.1:9050")  # استخدم بروكسي لتجنب الحظر
-firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+def create_driver():
+    firefox_options = Options()
+    firefox_options.add_argument("--disable-extensions")
+    firefox_options.add_argument("--disable-gpu")
+    firefox_options.add_argument("--no-sandbox")
+    firefox_options.add_argument("--disable-logging")
+    firefox_options.add_argument("--start-maximized")  # تشغيل المتصفح بكامل الشاشة
+    firefox_options.add_argument("--headless")  # تشغيل المتصفح بدون واجهة رسومية
 
-# إعداد خدمة Firefox
-service = Service(GeckoDriverManager().install())
+    service = Service(GeckoDriverManager().install())
 
-# تهيئة المتصفح
-driver = webdriver.Firefox(service=service, options=firefox_options)
+    # تهيئة المتصفح
+    driver = webdriver.Firefox(service=service, options=firefox_options)
+    return driver
 
 # إعداد مجلد لحفظ لقطات الشاشة
 if not os.path.exists("screenshots"):
@@ -72,18 +69,8 @@ def load_accounts_from_file(file_path):
     except Exception as e:
         print(f"حدث خطأ أثناء تحميل الحسابات من الملف: {e}")
     return accounts
-def save_cookies():
-    cookies = driver.get_cookies()
-    with open("cookies.json", "w") as file:
-        json.dump(cookies, file)
 
-def load_cookies():
-    with open("cookies.json", "r") as file:
-        cookies = json.load(file)
-    for cookie in cookies:
-        driver.add_cookie(cookie)
-
-def skip_cookies_if_present():
+def skip_cookies_if_present(driver):
     try:
         cookie_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.accept-cookies"))
@@ -96,7 +83,7 @@ def skip_cookies_if_present():
     except Exception as e:
         print("لم يتم العثور على زر الكوكيز، أو تم التعامل معه مسبقًا.")
 
-def click_sign_in_button():
+def click_sign_in_button(driver):
     try:
         sign_in_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "ul.secondary-nav button.sign-in"))
@@ -109,7 +96,7 @@ def click_sign_in_button():
     except Exception as e:
         print("لم يتم العثور على زر 'Entrar'.")
 
-def wait_for_page_to_load():
+def wait_for_page_to_load(driver):
     """انتظار تحميل الصفحة بالكامل باستخدام readyState."""
     try:
         WebDriverWait(driver, 20).until(
@@ -118,18 +105,18 @@ def wait_for_page_to_load():
         print("تم تحميل الصفحة بالكامل.")
     except Exception as e:
         print("حدث خطأ أثناء انتظار تحميل الصفحة.")
-        
-def login(account):
+
+def login(driver, account):
     """تسجيل الدخول إلى الموقع باستخدام بيانات الحساب."""
     try:
         driver.get("https://pt.secure.imvu.com")
-        wait_for_page_to_load()
+        wait_for_page_to_load(driver)
 
         # تخطي نافذة الكوكيز
-        skip_cookies_if_present()
+        skip_cookies_if_present(driver)
 
         # الضغط على زر تسجيل الدخول
-        click_sign_in_button()
+        click_sign_in_button(driver)
 
         # إدخال الإيميل
         email_field = WebDriverWait(driver, 20).until(
@@ -155,83 +142,34 @@ def login(account):
         human_like_delay()
         login_button.click()
 
-        wait_for_page_to_load()
+        wait_for_page_to_load(driver)
 
         print(f"تم تسجيل الدخول بنجاح باستخدام الحساب: {account['email']}")
     except Exception as e:
         print(f"خطأ أثناء تسجيل الدخول باستخدام الحساب: {e}")
-        
-        driver.get("https://www.imvu.com/next/av/L7AJ/")  # صفحة أخرى بعد الفشل
-        wait_for_page_to_load()
-        print("تم التوجه إلى الصفحة الجديدة.")
 
-
-
-def open_url_from_file(file_path):
-    """فتح الرابط الموجود في ملف."""
-    try:
-        with open(file_path, "r") as file:
-            url = file.readline().strip()
-            if url:
-                driver.get(url)
-                wait_for_page_to_load()
-                print(f"تم فتح الرابط: {url}")
-                
-                # أخذ لقطة شاشة بعد فتح الرابط
-                screenshot_path = f"screenshots/{screenshot_counter:04d}_post_url_open.png"
-                driver.save_screenshot(screenshot_path)
-                print(f"تم أخذ لقطة شاشة بعد فتح الرابط وحفظها في: {screenshot_path}")
-                
-                # الضغط على زر Follow بعد فتح الصفحة
-                click_follow_button_multiple_times()
-            else:
-                print("الرابط غير موجود في الملف.")
-    except Exception as e:
-        print(f"خطأ أثناء فتح الرابط من الملف: {e}")
-
-def take_screenshot_after_delay():
+def take_screenshot_after_delay(driver):
     """أخذ لقطة شاشة بعد تسجيل الدخول."""
     human_like_delay(15, 15)  # تأخير لمدة 15 ثانية
     screenshot_path = f"screenshots/{screenshot_counter:04d}_post_login.png"
     driver.save_screenshot(screenshot_path)
     print(f"تم أخذ لقطة شاشة بعد 15 ثانية وحفظها في: {screenshot_path}")
 
-def click_like_button():
-    """البحث عن زر Like والضغط عليه."""
-    try:
-        # العثور على الزر باستخدام CSS selector
-        like_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "li.fade-hover.action-bar-item.action-like-container > a.btn.action-like"))
-        )
-        save_click_location_screenshot(like_button, "like_button_found")
-        human_like_delay()
+def close_account_and_relaunch(driver):
+    """إغلاق الحساب الحالي وتهيئة المتصفح من جديد."""
+    driver.quit()  # إغلاق المتصفح
+    driver = create_driver()  # إعادة تهيئة المتصفح
+    return driver
 
-        # استخدام ActionChains لتنفيذ الضغط
-        action = ActionChains(driver)
-        action.move_to_element(like_button).click().perform()
-        print("تم الضغط على زر 'Like'.")
-        
-        # أخذ لقطة شاشة بعد الضغط
-        screenshot_path = f"screenshots/{screenshot_counter:04d}_post_like_click.png"
-        driver.save_screenshot(screenshot_path)
-        print(f"تم أخذ لقطة شاشة بعد الضغط على زر 'Like' وحفظها في: {screenshot_path}")
-        
-    except Exception as e:
-        print(f"حدث خطأ أثناء الضغط على زر 'Like': {e}")
-
-
-
+# تحميل الحسابات من الملف
 accounts = load_accounts_from_file("accounts.txt")
 
-# تسجيل الدخول إلى كل حساب
+# تسجيل الدخول لكل حساب
 for account in accounts:
-    login(account)
+    driver = create_driver()  # تهيئة المتصفح من جديد لكل حساب
+    login(driver, account)
+    take_screenshot_after_delay(driver)
+    driver = close_account_and_relaunch(driver)  # غلق الحساب وتهيئة المتصفح لحساب جديد
 
-# فتح الرابط من الملف والضغط على زر Follow عدة مرات
-open_url_from_file("link.txt")
-click_like_button()
-# أخذ لقطة شاشة بعد تأخير
-take_screenshot_after_delay()
-
-# إغلاق المتصفح
+# إغلاق المتصفح بعد الانتهاء من جميع الحسابات
 driver.quit()
